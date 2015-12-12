@@ -22,6 +22,7 @@
 
 
 #include <fcntl.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -49,6 +50,17 @@ void alarm_init_hello(int);
 void alarm_flood_hello(int);
 
 
+static struct sigaction init_hello = {
+	.sa_handler = alarm_init_hello,
+	.sa_flags = SA_RESTART,
+};
+
+static struct sigaction flood_hello = {
+	.sa_handler = alarm_flood_hello,
+	.sa_flags = SA_RESTART,
+};
+
+
 int main(int argc, char *argv[], char *envp[])
 {
 	int raw_socket;
@@ -57,6 +69,7 @@ int main(int argc, char *argv[], char *envp[])
 	struct sockaddr socket_address;
 	struct ethhdr *ethhdr_ptr;
 	unsigned char *buffer;
+
 
 	raw_socket = socket( PF_PACKET, SOCK_RAW, htons(ETH_P_ALL)) ;
 	buffer = (unsigned char *) malloc(PACKET_SIZE_MAX);
@@ -121,4 +134,16 @@ void packet_processor(unsigned char *buffer)
 	}
 
 	return;
+}
+
+
+void alarm_init_hello(int signo)
+{
+	
+}
+
+
+void alarm_flood_hello(int signo)
+{
+	
 }

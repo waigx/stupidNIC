@@ -26,9 +26,19 @@
 #include <pthread.h>
 
 
-void init_hello_handler(void *);
-void flood_hello_handler(void *);
-void hello_back_handler(void *);
+void init_hello_handler(void *init_hello_args_ptr)
+{
+}
+
+
+void flood_hello_handler(void *flood_hello_args_ptr)
+{
+}
+
+
+void hello_back_handler(void *hello_back_args_ptr)
+{
+}
 
 
 void hello_back(unsigned char *buffer)
