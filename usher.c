@@ -40,8 +40,8 @@
 #define PACKET_SIZE_MAX 65536
 
 
-static unsigned char ngbr_bits;
-static unsigned char ngbr_addr[HELLO_MAX_NEIGHBOR * HELLO_IDENTITY_LEN];
+//static unsigned char ngbr_bits;
+//static unsigned char ngbr_addr[HELLO_MAX_NEIGHBOR * HELLO_IDENTITY_LEN];
 
 void dump_packet(unsigned char *, int);
 void packet_processor(unsigned char *);
@@ -50,15 +50,15 @@ void alarm_init_hello(int);
 void alarm_flood_hello(int);
 
 
-static struct sigaction init_hello = {
-	.sa_handler = alarm_init_hello,
-	.sa_flags = SA_RESTART,
-};
-
-static struct sigaction flood_hello = {
-	.sa_handler = alarm_flood_hello,
-	.sa_flags = SA_RESTART,
-};
+//static struct sigaction init_hello = {
+//	.sa_handler = alarm_init_hello,
+//	.sa_flags = SA_RESTART,
+//};
+//
+//static struct sigaction flood_hello = {
+//	.sa_handler = alarm_flood_hello,
+//	.sa_flags = SA_RESTART,
+//};
 
 
 int main(int argc, char *argv[], char *envp[])
