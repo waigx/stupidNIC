@@ -20,9 +20,11 @@
  *
  */
 
+
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <string.h>
 #include <unistd.h>
 
@@ -37,9 +39,14 @@
 #define PACKET_SIZE_MAX 65536
 
 
+static unsigned char ngbr_bits;
+static unsigned char ngbr_addr[HELLO_MAX_NEIGHBOR * HELLO_IDENTITY_LEN];
 
 void dump_packet(unsigned char *, int);
 void packet_processor(unsigned char *);
+
+void alarm_init_hello(int);
+void alarm_flood_hello(int);
 
 
 int main(int argc, char *argv[], char *envp[])
@@ -59,7 +66,7 @@ int main(int argc, char *argv[], char *envp[])
 		return 1;
 	}
 
-	while(1){
+	while(true){
 		sockaddr_size = sizeof(socket_address);
 		buffer_size = recvfrom(raw_socket, buffer, PACKET_SIZE_MAX, 0, &socket_address, (socklen_t*)&sockaddr_size);
 		if(buffer_size<0 ){
@@ -98,15 +105,15 @@ void packet_processor(unsigned char *buffer)
 	hello_hdr_ptr = (hello_hdr *)(buffer + sizeof(struct ethhdr));
 	switch (hello_hdr_ptr->hello_stage){
 		case HELLO_STAGE_I:
-			hello_back();
+			hello_back(buffer);
 			break;
 
 		case HELLO_STAGE_II:
-			update_neighbor();
+			update_neighbor(buffer);
 			break;
 
 		case HELLO_STAGE_III:
-			update_topo();
+			update_topo(buffer);
 			break;
 
 		default:

@@ -1,17 +1,26 @@
 CC = gcc
 CFLAGS = -Iinclude -Werror
 
-TARGET = hello_postman
+TARGETS = $(patsubst ./%.c, %, $(wildcard ./*.c))
 
 
-.PHONY: all binary clean
+.PHONY: all binary
 
-default: all
+all: $(TARGETS)
+
+$(TARGETS): $(patsubst lib/%.c, obj/%.o, $(wildcard lib/*.c))
+	@$(MAKE) --no-print-directory BIN=$@ binary
+
+binary: $(BIN).c
+	$(CC) $(CFLAGS) -o $(BIN) $<  obj/*.o
+
+obj/%.o: lib/%.c include/%.h
+	@mkdir -p obj
+	$(CC) -c $(CFLAGS) -o $@ $<
 
 
-all: 
-	$(CC) $(CFLAGS) -o $(TARGET) $(TARGET).c
-
+.PHONY: clean
 
 clean:
-	rm hello_postman
+	rm -rf $(TARGETS) obj
+
