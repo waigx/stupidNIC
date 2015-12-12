@@ -1,0 +1,11 @@
+################################################################################
+###                               README                                     ###
+################################################################################
+
+The name StupidNIC is homologous with SmartNIC. StupidNIC runs on a classic NIC 
+installed linux machines, and provides the compatability with SmartNIC network.
+
+This project shared the same hello library with SmartNIC.
+
+################################################################################
+
