@@ -1,4 +1,3 @@
-#include <netdb.h>
 /*
  *
  *  This file is part of project SmartNIC
