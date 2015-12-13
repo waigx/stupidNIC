@@ -29,32 +29,43 @@
 
 #define HELLO_MSG_ETH_TYPE			0x07FF
 
-#define HELLO_STAGE_I				   0x1
-#define HELLO_STAGE_II				   0x2
-#define HELLO_STAGE_III				   0x3
-
 #define HELLO_MAX_NEIGHBOR			   0x4
 #define HELLO_IDENTITY_LEN			   0x6
 
 
+#define HELLO_INIT_INTERVAL			     5
+#define HELLO_FLOOD_WAIT			     1
+
+
+typedef enum hello_stage {
+	HELLO_STAGE_I,  
+        HELLO_STAGE_II, 
+        HELLO_STAGE_III,
+} hello_stage_t;
+
+
 typedef struct hello_hdr {
-	uint8_t				hello_stage;
+	unsigned char			hello_src[HELLO_IDENTITY_LEN];
+	hello_stage_t			hello_stage;
 	unsigned int			hello_sequence;
 	unsigned char			hello_ngbr_bits;
-} hello_hdr;
+} hello_hdr_t;
 
 
 typedef struct hello_payload {
 	unsigned char			hello_payload[HELLO_MAX_NEIGHBOR * HELLO_IDENTITY_LEN];
-} hello_payload;
+} hello_payload_t;
 
 
-void init_hello_handler(void *);
-void flood_hello_handler(void *);
+int hello_send_raw_socket;
+
+void hello_init_handler(void *);
+void hello_flood_handler(void *);
 void hello_back_handler(void *);
 
 void hello_back(unsigned char *);
-void update_neighbor(unsigned char *);
-void update_topo(unsigned char *);
+void hello_update_neighbor(unsigned char *);
+
+char * hello_identity_get(char *);
 
 #endif

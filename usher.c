@@ -42,57 +42,67 @@
 
 //static unsigned char ngbr_bits;
 //static unsigned char ngbr_addr[HELLO_MAX_NEIGHBOR * HELLO_IDENTITY_LEN];
+extern int hello_send_raw_socket;
 
 void dump_packet(unsigned char *, int);
 void packet_processor(unsigned char *);
 
-void alarm_init_hello(int);
-void alarm_flood_hello(int);
+void alarm_hello_init(int);
+void alarm_hello_flood(int);
 
 
-//static struct sigaction init_hello = {
-//	.sa_handler = alarm_init_hello,
-//	.sa_flags = SA_RESTART,
-//};
-//
-//static struct sigaction flood_hello = {
-//	.sa_handler = alarm_flood_hello,
-//	.sa_flags = SA_RESTART,
-//};
+static struct sigaction hello_init = {
+	.sa_handler = alarm_hello_init,
+	.sa_flags = SA_RESTART,
+};
+
+static struct sigaction hello_flood = {
+	.sa_handler = alarm_hello_flood,
+	.sa_flags = SA_RESTART,
+};
 
 
 int main(int argc, char *argv[], char *envp[])
 {
-	int raw_socket;
+	int hello_recv_raw_socket;
 	int buffer_size;
 	int sockaddr_size;
 	struct sockaddr socket_address;
 	struct ethhdr *ethhdr_ptr;
 	unsigned char *buffer;
 
-
-	raw_socket = socket( PF_PACKET, SOCK_RAW, htons(ETH_P_ALL)) ;
-	buffer = (unsigned char *) malloc(PACKET_SIZE_MAX);
-
-	if(raw_socket < 0){
-		printf("Raw socket creation error.\n");
+	hello_send_raw_socket = socket( PF_PACKET, SOCK_RAW, htons(ETH_P_ALL)) ;
+	if(hello_send_raw_socket < 0){
+		printf("Send raw socket creation error.\n");
 		return 1;
 	}
 
+	hello_recv_raw_socket = socket( PF_PACKET, SOCK_RAW, htons(ETH_P_ALL)) ;
+	if(hello_recv_raw_socket < 0){
+		printf("Recv raw socket creation error.\n");
+		return 1;
+	}
+
+	buffer = (unsigned char *) malloc(PACKET_SIZE_MAX);
+
+	sigaction(SIGALRM, &hello_init, NULL);
+	alarm(HELLO_INIT_INTERVAL);
+
 	while(true){
 		sockaddr_size = sizeof(socket_address);
-		buffer_size = recvfrom(raw_socket, buffer, PACKET_SIZE_MAX, 0, &socket_address, (socklen_t*)&sockaddr_size);
+		buffer_size = recvfrom(hello_recv_raw_socket, buffer, PACKET_SIZE_MAX, 0, &socket_address, (socklen_t*)&sockaddr_size);
 		if(buffer_size<0 ){
 			printf("Recvfrom error, failed to get packets\n");
 			return 1;
 		}
+//		dump_packet(buffer, buffer_size);
 
 		ethhdr_ptr = (struct ethhdr *)buffer;
 		if (ethhdr_ptr->h_proto == HELLO_MSG_ETH_TYPE){
 			packet_processor(buffer);
 		}
 	}
-	close(raw_socket);
+	close(hello_recv_raw_socket);
 	free(buffer);
 	return 0;
 }
@@ -113,20 +123,21 @@ void dump_packet(unsigned char *buffer, int buffer_size)
 
 void packet_processor(unsigned char *buffer)
 {
-	hello_hdr *hello_hdr_ptr;
+	hello_hdr_t *hello_hdr_ptr;
 
-	hello_hdr_ptr = (hello_hdr *)(buffer + sizeof(struct ethhdr));
+	hello_hdr_ptr = (hello_hdr_t *)(buffer + sizeof(struct ethhdr));
 	switch (hello_hdr_ptr->hello_stage){
 		case HELLO_STAGE_I:
 			hello_back(buffer);
 			break;
 
 		case HELLO_STAGE_II:
-			update_neighbor(buffer);
+			hello_update_neighbor(buffer);
 			break;
 
 		case HELLO_STAGE_III:
-			update_topo(buffer);
+// TODO:
+//			update_topo(buffer);
 			break;
 
 		default:
@@ -137,13 +148,15 @@ void packet_processor(unsigned char *buffer)
 }
 
 
-void alarm_init_hello(int signo)
+void alarm_hello_init(int signo)
 {
-	
+	sigaction(SIGALRM, &hello_flood, &hello_init);
+	alarm(HELLO_FLOOD_WAIT);
 }
 
 
-void alarm_flood_hello(int signo)
+void alarm_hello_flood(int signo)
 {
-	
+	sigaction(SIGALRM, &hello_init, &hello_flood);
+	alarm(HELLO_INIT_INTERVAL - HELLO_FLOOD_WAIT);
 }

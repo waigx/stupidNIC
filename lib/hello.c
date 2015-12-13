@@ -21,13 +21,28 @@
  */
 
 
-#include <unistd.h>
-#include <hello.h>
 #include <pthread.h>
 
+#include <net/ethernet.h>
+#include <netinet/in.h>
+#include <netinet/if_ether.h>
+#include <sys/socket.h>
+
+#include <hello.h>
+
+
+extern int hello_send_raw_socket;
 
 void init_hello_handler(void *init_hello_args_ptr)
 {
+
+//	if (init_hello_args_ptr == NULL) {
+//	}
+//
+//	hello_hdr_t init_hello_hdr = {
+//		.hello_stage = HELLO_STAGE_I,
+//	};
+//	pthread_detach(pthread_self());
 }
 
 
@@ -47,13 +62,13 @@ void hello_back(unsigned char *buffer)
 }
 
 
-void update_neighbor(unsigned char *buffer)
+void hello_update_neighbor(unsigned char *buffer)
 {
 	
 }
 
 
-void update_topo(unsigned char *buffer)
+char * hello_identity_get(char *buffer)
 {
-	
+	return NULL;
 }

@@ -14,7 +14,7 @@ $(TARGETS): $(patsubst lib/%.c, obj/%.o, $(wildcard lib/*.c))
 binary: $(BIN).c
 	$(CC) $(CFLAGS) -o $(BIN) $< obj/*.o
 
-obj/%.o: lib/%.c include/%.h
+obj/%.o: lib/%.c $(wildcard include/*.h)
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) -o $@ $<
 
