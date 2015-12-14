@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Iinclude -Wall -Werror -g
+CFLAGS = -Iinclude -Wall -Werror -g -lpthread
 
 TARGETS = $(patsubst ./%.c, %, $(wildcard ./*.c))
 

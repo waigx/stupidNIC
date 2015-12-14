@@ -22,6 +22,7 @@
 
 
 #include <fcntl.h>
+#include <pthread.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -43,6 +44,9 @@
 //static unsigned char ngbr_bits;
 //static unsigned char ngbr_addr[HELLO_MAX_NEIGHBOR * HELLO_IDENTITY_LEN];
 extern int hello_send_raw_socket;
+extern char hello_if[HELLO_IF_NAME_LEN];
+extern unsigned char hello_mac_addr[6];
+static pthread_t hello_init_pid;
 
 void dump_packet(unsigned char *, int);
 void packet_processor(unsigned char *);
@@ -70,27 +74,26 @@ int main(int argc, char *argv[], char *envp[])
 	struct sockaddr socket_address;
 	struct ethhdr *ethhdr_ptr;
 	unsigned char *buffer;
-
-	hello_send_raw_socket = socket( PF_PACKET, SOCK_RAW, htons(ETH_P_ALL)) ;
+	hello_send_raw_socket = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL)) ;
 	if(hello_send_raw_socket < 0){
-		printf("Send raw socket creation error.\n");
+		perror("Send raw socket creation error.\n");
 		return 1;
 	}
 
-	hello_recv_raw_socket = socket( PF_PACKET, SOCK_RAW, htons(ETH_P_ALL)) ;
+	hello_recv_raw_socket = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL)) ;
 	if(hello_recv_raw_socket < 0){
-		printf("Recv raw socket creation error.\n");
+		perror("Recv raw socket creation error.\n");
 		return 1;
 	}
 
-	buffer = (unsigned char *) malloc(PACKET_SIZE_MAX);
+	buffer = (unsigned char *)malloc(PACKET_SIZE_MAX);
 
 	sigaction(SIGALRM, &hello_init, NULL);
 	alarm(HELLO_INIT_INTERVAL);
 
 	while(true){
 		sockaddr_size = sizeof(socket_address);
-		buffer_size = recvfrom(hello_recv_raw_socket, buffer, PACKET_SIZE_MAX, 0, &socket_address, (socklen_t*)&sockaddr_size);
+		buffer_size = recvfrom(hello_recv_raw_socket, buffer, PACKET_SIZE_MAX, 0, &socket_address, (socklen_t *)&sockaddr_size);
 		if(buffer_size<0 ){
 			printf("Recvfrom error, failed to get packets\n");
 			return 1;
@@ -102,6 +105,7 @@ int main(int argc, char *argv[], char *envp[])
 			packet_processor(buffer);
 		}
 	}
+	close(hello_send_raw_socket);
 	close(hello_recv_raw_socket);
 	free(buffer);
 	return 0;
@@ -152,6 +156,7 @@ void alarm_hello_init(int signo)
 {
 	sigaction(SIGALRM, &hello_flood, &hello_init);
 	alarm(HELLO_FLOOD_WAIT);
+	pthread_create(&hello_init_pid, NULL, &hello_init_handler, NULL);
 }
 
 

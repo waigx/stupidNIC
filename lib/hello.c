@@ -22,37 +22,74 @@
 
 
 #include <pthread.h>
+#include <string.h>
+#include <stdio.h>
 
 #include <net/ethernet.h>
+#include <net/if.h>
 #include <netinet/in.h>
 #include <netinet/if_ether.h>
+#include <netpacket/packet.h>
 #include <sys/socket.h>
 
 #include <hello.h>
+#include <ifutils.h>
 
+#include <arpa/inet.h>
+#include <sys/ioctl.h>
 
 extern int hello_send_raw_socket;
+extern char hello_if[HELLO_IF_NAME_LEN];
 
-void init_hello_handler(void *init_hello_args_ptr)
+void *hello_init_handler(void *init_hello_args_ptr)
 {
+	struct sockaddr_ll socket_address;
+	struct ethhdr *ethhdr_ptr;
+	unsigned char eth_frame[HELLO_MAX_PACKET];
+	unsigned int eth_frame_len;
+	unsigned char if_macaddr[6];
+	hello_hdr_t hello_init_hdr;
 
-//	if (init_hello_args_ptr == NULL) {
-//	}
-//
-//	hello_hdr_t init_hello_hdr = {
-//		.hello_stage = HELLO_STAGE_I,
-//	};
-//	pthread_detach(pthread_self());
+	pthread_detach(pthread_self());
+	eth_frame_len = 0;
+
+	if (init_hello_args_ptr == NULL) {
+		getmacaddr(HELLO_DFT_IF, if_macaddr);
+	} else {
+		memcpy(if_macaddr, (unsigned char *)init_hello_args_ptr, 6);
+	}
+
+	ethhdr_ptr = (struct ethhdr *)eth_frame; 
+	memcpy(ethhdr_ptr->h_dest, hello_mac_addr, 6);
+	memcpy(ethhdr_ptr->h_source, if_macaddr, 6);
+	ethhdr_ptr->h_proto = htons(HELLO_MSG_ETH_TYPE);
+	eth_frame_len += sizeof(struct ethhdr);
+
+	hello_init_hdr.hello_stage = HELLO_STAGE_I;
+	memcpy(hello_init_hdr.hello_src, if_macaddr, HELLO_IDENTITY_LEN);
+
+	memcpy(eth_frame + eth_frame_len, &hello_init_hdr, sizeof(hello_hdr_t));
+	eth_frame_len += sizeof(hello_hdr_t);
+
+	socket_address.sll_ifindex = getifidx(HELLO_DFT_IF);
+	socket_address.sll_halen = ETH_ALEN;
+
+	if (sendto(hello_send_raw_socket, eth_frame, eth_frame_len, 0, (struct sockaddr *)&socket_address, sizeof(struct sockaddr_ll)) < 0) {
+		printf("Sendto error, failed to send packets\n");
+	}
+	return NULL;
 }
 
 
-void flood_hello_handler(void *flood_hello_args_ptr)
+void *hello_flood_handler(void *flood_hello_args_ptr)
 {
+	return NULL;
 }
 
 
-void hello_back_handler(void *hello_back_args_ptr)
+void *hello_back_handler(void *hello_back_args_ptr)
 {
+	return NULL;
 }
 
 
@@ -68,7 +105,7 @@ void hello_update_neighbor(unsigned char *buffer)
 }
 
 
-char * hello_identity_get(char *buffer)
+char *hello_identity_get(char *buffer)
 {
 	return NULL;
 }

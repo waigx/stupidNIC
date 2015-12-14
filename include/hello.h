@@ -27,14 +27,18 @@
 #include <stdint.h>
 
 
-#define HELLO_MSG_ETH_TYPE			0x07FF
+#define HELLO_MSG_ETH_TYPE				0x07FF
+#define HELLO_MAX_PACKET				  1500 
+#define HELLO_IF_NAME_LEN				    32
 
-#define HELLO_MAX_NEIGHBOR			   0x4
-#define HELLO_IDENTITY_LEN			   0x6
+#define HELLO_MAX_NEIGHBOR				   0x4
+#define HELLO_IDENTITY_LEN				   0x6
 
+#define HELLO_INIT_INTERVAL				     5
+#define HELLO_FLOOD_WAIT				     1
 
-#define HELLO_INIT_INTERVAL			     5
-#define HELLO_FLOOD_WAIT			     1
+#define HELLO_DFT_IF					"eth0"
+#define HELLO_DFT_MAC	  {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
 
 
 typedef enum hello_stage {
@@ -58,14 +62,16 @@ typedef struct hello_payload {
 
 
 int hello_send_raw_socket;
+char hello_if[HELLO_IF_NAME_LEN];
+unsigned char hello_mac_addr[6];
 
-void hello_init_handler(void *);
-void hello_flood_handler(void *);
-void hello_back_handler(void *);
+void *hello_init_handler(void *);
+void *hello_flood_handler(void *);
+void *hello_back_handler(void *);
 
 void hello_back(unsigned char *);
 void hello_update_neighbor(unsigned char *);
 
-char * hello_identity_get(char *);
+char *hello_identity_get(char *);
 
 #endif
