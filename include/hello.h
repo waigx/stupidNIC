@@ -72,6 +72,6 @@ void *hello_back_handler(void *);
 void hello_back(unsigned char *);
 void hello_update_neighbor(unsigned char *);
 
-char *hello_identity_get(char *);
+unsigned char *hello_identity_get(unsigned char *);
 
 #endif

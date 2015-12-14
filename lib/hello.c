@@ -54,7 +54,7 @@ void *hello_init_handler(void *init_hello_args_ptr)
 	eth_frame_len = 0;
 
 	if (init_hello_args_ptr == NULL) {
-		getmacaddr(HELLO_DFT_IF, if_macaddr);
+		getmacaddr(hello_if, if_macaddr);
 	} else {
 		memcpy(if_macaddr, (unsigned char *)init_hello_args_ptr, 6);
 	}
@@ -66,12 +66,12 @@ void *hello_init_handler(void *init_hello_args_ptr)
 	eth_frame_len += sizeof(struct ethhdr);
 
 	hello_init_hdr.hello_stage = HELLO_STAGE_I;
-	memcpy(hello_init_hdr.hello_src, if_macaddr, HELLO_IDENTITY_LEN);
+	memcpy(hello_init_hdr.hello_src, hello_identity_get(if_macaddr), HELLO_IDENTITY_LEN);
 
 	memcpy(eth_frame + eth_frame_len, &hello_init_hdr, sizeof(hello_hdr_t));
 	eth_frame_len += sizeof(hello_hdr_t);
 
-	socket_address.sll_ifindex = getifidx(HELLO_DFT_IF);
+	socket_address.sll_ifindex = getifidx(hello_if);
 	socket_address.sll_halen = ETH_ALEN;
 
 	if (sendto(hello_send_raw_socket, eth_frame, eth_frame_len, 0, (struct sockaddr *)&socket_address, sizeof(struct sockaddr_ll)) < 0) {
@@ -105,7 +105,7 @@ void hello_update_neighbor(unsigned char *buffer)
 }
 
 
-char *hello_identity_get(char *buffer)
+unsigned char *hello_identity_get(unsigned char *buffer)
 {
-	return NULL;
+	return getmacaddr(hello_if, buffer);
 }

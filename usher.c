@@ -37,16 +37,16 @@
 
 #include <hello.h>
 
-
 #define PACKET_SIZE_MAX 65536
 
 
-//static unsigned char ngbr_bits;
-//static unsigned char ngbr_addr[HELLO_MAX_NEIGHBOR * HELLO_IDENTITY_LEN];
 extern int hello_send_raw_socket;
 extern char hello_if[HELLO_IF_NAME_LEN];
 extern unsigned char hello_mac_addr[6];
-static pthread_t hello_init_pid;
+
+static pthread_t handler_pid;
+//static unsigned char hello_ngbr_bits;
+//static unsigned char hello_ngbr_addr[HELLO_MAX_NEIGHBOR * HELLO_IDENTITY_LEN];
 
 void dump_packet(unsigned char *, int);
 void packet_processor(unsigned char *);
@@ -74,6 +74,15 @@ int main(int argc, char *argv[], char *envp[])
 	struct sockaddr socket_address;
 	struct ethhdr *ethhdr_ptr;
 	unsigned char *buffer;
+	unsigned char temp_macaddr[6] = HELLO_DFT_MAC;
+
+	if (argc > 1) {
+		strcpy(hello_if, argv[1]);
+	} else {
+		strcpy(hello_if, HELLO_DFT_IF);
+	}
+	memcpy(hello_mac_addr, temp_macaddr, 6);
+
 	hello_send_raw_socket = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL)) ;
 	if(hello_send_raw_socket < 0){
 		perror("Send raw socket creation error.\n");
@@ -156,7 +165,7 @@ void alarm_hello_init(int signo)
 {
 	sigaction(SIGALRM, &hello_flood, &hello_init);
 	alarm(HELLO_FLOOD_WAIT);
-	pthread_create(&hello_init_pid, NULL, &hello_init_handler, NULL);
+	pthread_create(&handler_pid, NULL, &hello_init_handler, NULL);
 }
 
 
