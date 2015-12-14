@@ -30,6 +30,30 @@
 #include <sys/socket.h>
 
 
+int getifidx(const char *if_name)
+{
+	int temp_socket;
+	struct ifreq ifr;
+
+	memset(&ifr, 0, sizeof(struct ifreq));
+	strncpy(ifr.ifr_name, if_name, strlen(if_name));
+
+	
+	if ((temp_socket = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
+		perror("socket");
+		return -1;
+	}
+
+	if (ioctl(temp_socket, SIOCGIFINDEX, &ifr) < 0)
+		perror("SIOCGIFINDEX");
+
+
+	close(temp_socket);
+
+	return ifr.ifr_ifindex;
+}
+
+
 unsigned char *getmacaddr(const char *if_name, unsigned char *buffer)
 {
 	int temp_socket;
