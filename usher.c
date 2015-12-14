@@ -147,7 +147,7 @@ void packet_processor(unsigned char *buffer)
 	hello_hdr_ptr = (hello_hdr_t *)(buffer + sizeof(struct ethhdr));
 	switch (hello_hdr_ptr->hello_stage){
 		case HELLO_STAGE_I:
-			hello_back(buffer);
+			hello_back(&handler_pid, 0);
 			break;
 
 		case HELLO_STAGE_II:

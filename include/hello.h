@@ -24,6 +24,7 @@
 #ifndef __HELLO_H
 #define __HELLO_H
 
+#include <pthread.h>
 #include <stdint.h>
 
 
@@ -66,6 +67,7 @@ typedef struct hello_thread_args {
 	unsigned char *			hello_ngbr_bits;
 	unsigned char *			hello_payload;
 	unsigned char *			hello_extra;
+	unsigned char			hello_port;
 } hello_thread_args_t;
 
 
@@ -77,7 +79,7 @@ void *hello_init_handler(void *);
 void *hello_flood_handler(void *);
 void *hello_back_handler(void *);
 
-void hello_back(unsigned char *);
+void hello_back(pthread_t *, unsigned char);
 void hello_update_neighbor(unsigned char *);
 
 unsigned char *hello_identity_get(unsigned char *);
