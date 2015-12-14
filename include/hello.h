@@ -80,7 +80,7 @@ void *hello_flood_handler(void *);
 void *hello_back_handler(void *);
 
 void hello_back(pthread_t *, unsigned char);
-void hello_update_neighbor(unsigned char *);
+void hello_update_neighbor(hello_thread_args_t *);
 
 unsigned char *hello_identity_get(unsigned char *);
 

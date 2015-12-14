@@ -152,9 +152,13 @@ void hello_back(pthread_t *handler_pid, unsigned char hello_port)
 }
 
 
-void hello_update_neighbor(unsigned char *buffer)
+void hello_update_neighbor(hello_thread_args_t * hello_args)
 {
-	
+	hello_hdr_t *hello_hdr_ptr;
+	*(hello_args->hello_ngbr_bits) |= (1 << hello_args->hello_port);
+	hello_hdr_ptr = (hello_hdr_t *)(hello_args->hello_recvd_buff + sizeof(struct ethhdr));
+	memcpy(hello_args->hello_payload + (HELLO_IDENTITY_LEN) * hello_args->hello_port, hello_hdr_ptr->hello_src, HELLO_IDENTITY_LEN);
+	return;
 }
 
 

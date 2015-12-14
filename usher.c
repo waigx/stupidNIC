@@ -46,7 +46,7 @@ extern unsigned char hello_mac_addr[6];
 
 static pthread_t handler_pid;
 static unsigned char hello_ngbr_bits;
-static unsigned char hello_ngbr_addr[HELLO_MAX_NEIGHBOR * HELLO_IDENTITY_LEN];
+static unsigned char hello_ngbr[HELLO_MAX_NEIGHBOR * HELLO_IDENTITY_LEN];
 static hello_thread_args_t hello_thread_universal_args;
 
 void dump_packet(unsigned char *, int);
@@ -87,7 +87,7 @@ int main(int argc, char *argv[], char *envp[])
 	memcpy(hello_mac_addr, temp_macaddr, 6);
 	hello_thread_universal_args.hello_recvd_buff = NULL;
 	hello_thread_universal_args.hello_ngbr_bits = &hello_ngbr_bits;
-	hello_thread_universal_args.hello_payload = hello_ngbr_addr;
+	hello_thread_universal_args.hello_payload = hello_ngbr;
 	hello_thread_universal_args.hello_extra = NULL;
 
 	hello_send_raw_socket = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL)) ;
@@ -151,7 +151,7 @@ void packet_processor(unsigned char *buffer)
 			break;
 
 		case HELLO_STAGE_II:
-			hello_update_neighbor(buffer);
+			hello_update_neighbor(&hello_thread_universal_args);
 			break;
 
 		case HELLO_STAGE_III:
