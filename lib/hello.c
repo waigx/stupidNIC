@@ -53,7 +53,7 @@ void *hello_init_handler(void *init_hello_args_ptr)
 	pthread_detach(pthread_self());
 	eth_frame_len = 0;
 
-	if (init_hello_args_ptr == NULL) {
+	if (((hello_thread_args_t *)init_hello_args_ptr)->hello_extra == NULL) {
 		getmacaddr(hello_if, if_macaddr);
 	} else {
 		memcpy(if_macaddr, (unsigned char *)init_hello_args_ptr, 6);

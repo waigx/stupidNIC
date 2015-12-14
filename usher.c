@@ -45,8 +45,9 @@ extern char hello_if[HELLO_IF_NAME_LEN];
 extern unsigned char hello_mac_addr[6];
 
 static pthread_t handler_pid;
-//static unsigned char hello_ngbr_bits;
-//static unsigned char hello_ngbr_addr[HELLO_MAX_NEIGHBOR * HELLO_IDENTITY_LEN];
+static unsigned char hello_ngbr_bits;
+static unsigned char hello_ngbr_addr[HELLO_MAX_NEIGHBOR * HELLO_IDENTITY_LEN];
+static hello_thread_args_t hello_thread_universal_args;
 
 void dump_packet(unsigned char *, int);
 void packet_processor(unsigned char *);
@@ -81,7 +82,13 @@ int main(int argc, char *argv[], char *envp[])
 	} else {
 		strcpy(hello_if, HELLO_DFT_IF);
 	}
+
+	buffer = (unsigned char *)malloc(PACKET_SIZE_MAX);
 	memcpy(hello_mac_addr, temp_macaddr, 6);
+	hello_thread_universal_args.hello_recvd_buff = NULL;
+	hello_thread_universal_args.hello_ngbr_bits = &hello_ngbr_bits;
+	hello_thread_universal_args.hello_payload = hello_ngbr_addr;
+	hello_thread_universal_args.hello_extra = NULL;
 
 	hello_send_raw_socket = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL)) ;
 	if(hello_send_raw_socket < 0){
@@ -95,7 +102,6 @@ int main(int argc, char *argv[], char *envp[])
 		return 1;
 	}
 
-	buffer = (unsigned char *)malloc(PACKET_SIZE_MAX);
 
 	sigaction(SIGALRM, &hello_init, NULL);
 	alarm(HELLO_INIT_INTERVAL);
@@ -149,7 +155,7 @@ void packet_processor(unsigned char *buffer)
 			break;
 
 		case HELLO_STAGE_III:
-// TODO:
+// TODO: Ignore HELLO_STAGE_III packets on a stupidNIC machine
 //			update_topo(buffer);
 			break;
 
@@ -165,7 +171,7 @@ void alarm_hello_init(int signo)
 {
 	sigaction(SIGALRM, &hello_flood, &hello_init);
 	alarm(HELLO_FLOOD_WAIT);
-	pthread_create(&handler_pid, NULL, &hello_init_handler, NULL);
+	pthread_create(&handler_pid, NULL, &hello_init_handler, &hello_thread_universal_args);
 }
 
 
@@ -173,4 +179,5 @@ void alarm_hello_flood(int signo)
 {
 	sigaction(SIGALRM, &hello_init, &hello_flood);
 	alarm(HELLO_INIT_INTERVAL - HELLO_FLOOD_WAIT);
+	pthread_create(&handler_pid, NULL, &hello_flood_handler,  &hello_thread_universal_args);
 }

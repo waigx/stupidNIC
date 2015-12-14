@@ -61,6 +61,14 @@ typedef struct hello_payload {
 } hello_payload_t;
 
 
+typedef struct hello_thread_args {
+	unsigned char *			hello_recvd_buff;
+	unsigned char *			hello_ngbr_bits;
+	unsigned char *			hello_payload;
+	unsigned char *			hello_extra;
+} hello_thread_args_t;
+
+
 int hello_send_raw_socket;
 char hello_if[HELLO_IF_NAME_LEN];
 unsigned char hello_mac_addr[6];
