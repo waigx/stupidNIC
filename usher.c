@@ -118,7 +118,7 @@ int main(int argc, char *argv[], char *envp[])
 //		dump_packet(buffer, buffer_size);
 
 		ethhdr_ptr = (struct ethhdr *)buffer;
-		if (ethhdr_ptr->h_proto == HELLO_MSG_ETH_TYPE){
+		if (ntohs(ethhdr_ptr->h_proto) == HELLO_MSG_ETH_TYPE){
 			packet_processor(buffer);
 		}
 	}

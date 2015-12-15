@@ -203,6 +203,7 @@ void hello_back(pthread_t *handler_pid, unsigned char hello_port)
 	hello_thread_args_t *hello_back_args_ptr;
 	hello_back_args_ptr = malloc(sizeof(hello_thread_args_t));
 	hello_back_args_ptr->hello_port = hello_port;
+	printf("Hello recived\n");
 	pthread_create(handler_pid, NULL, &hello_flood_handler,  &hello_back_args_ptr);
 }
 
