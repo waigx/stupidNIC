@@ -86,7 +86,7 @@ int main(int argc, char *argv[], char *envp[])
 
 	buffer = (unsigned char *)malloc(PACKET_SIZE_MAX);
 	memcpy(hello_mac_addr, temp_macaddr, 6);
-	hello_thread_universal_args.hello_recvd_buff = NULL;
+	hello_thread_universal_args.hello_recvd_buff = buffer;
 	hello_thread_universal_args.hello_ngbr_bits = &hello_ngbr_bits;
 	hello_thread_universal_args.hello_payload = hello_ngbr;
 	hello_thread_universal_args.hello_extra = NULL;

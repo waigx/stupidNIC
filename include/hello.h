@@ -39,7 +39,7 @@
 #define HELLO_FLOOD_WAIT				     1
 
 #define HELLO_DFT_IF					"eth0"
-#define HELLO_DFT_MAC	  {0xff, 0xff, 0xff, 0xff, 0xff, 0xff}
+#define HELLO_DFT_MAC	  {0xff, 0xff, 0xff, 0xff, 0xff, 0xef}
 
 
 typedef enum hello_stage {
