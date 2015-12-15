@@ -177,7 +177,7 @@ void alarm_hello_init(int signo)
 
 	sigaction(SIGALRM, &hello_flood, &hello_init);
 	alarm(HELLO_FLOOD_WAIT);
-	pthread_create(&handler_pid, NULL, &hello_init_handler, &hello_init_args_ptr);
+	pthread_create(&handler_pid, NULL, &hello_init_handler, hello_init_args_ptr);
 }
 
 
@@ -189,5 +189,5 @@ void alarm_hello_flood(int signo)
 
 	sigaction(SIGALRM, &hello_init, &hello_flood);
 	alarm(HELLO_INIT_INTERVAL - HELLO_FLOOD_WAIT);
-	pthread_create(&handler_pid, NULL, &hello_flood_handler,  &hello_flood_args_ptr);
+	pthread_create(&handler_pid, NULL, &hello_flood_handler,  hello_flood_args_ptr);
 }
