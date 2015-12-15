@@ -22,6 +22,7 @@
 
 
 #include <pthread.h>
+#include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
@@ -113,7 +114,6 @@ void *hello_flood_handler(void *flood_hello_args_ptr)
 		memcpy(if_macaddr, ((hello_thread_args_t *)flood_hello_args_ptr)->hello_extra, 6);
 	}
 
-
 	//Fill ethernet header
 	ethhdr_ptr = (struct ethhdr *)eth_frame; 
 	memcpy(ethhdr_ptr->h_dest, hello_mac_addr, 6);
@@ -155,7 +155,11 @@ void *hello_back_handler(void *hello_back_args_ptr)
 	unsigned char eth_frame[HELLO_MAX_PACKET];
 	unsigned int eth_frame_len;
 	unsigned char if_macaddr[6];
-	hello_hdr_t hello_init_hdr;
+	unsigned char hello_identity[HELLO_IDENTITY_LEN];
+	hello_hdr_t hello_back_hdr;
+	hello_hdr_t *hello_hdr_ptr;
+	int i;
+	bool is_loop;
 
 	pthread_detach(pthread_self());
 	eth_frame_len = 0;
@@ -170,6 +174,21 @@ void *hello_back_handler(void *hello_back_args_ptr)
 		memcpy(if_macaddr, ((hello_thread_args_t *)hello_back_args_ptr)->hello_extra, 6);
 	}
 
+	//Get hello identity
+	hello_identity_get(hello_identity);
+
+	is_loop = true;
+	hello_hdr_ptr = (hello_hdr_t *)(((hello_thread_args_t *)hello_back_args_ptr)->hello_recvd_buff + sizeof(struct ethhdr));
+	for (i = 0; i < HELLO_IDENTITY_LEN; i++) {
+		if (hello_hdr_ptr->hello_src[i] != hello_identity[i]) {
+			is_loop = false;
+			break;
+		}
+	}
+	if (is_loop) {
+		free(hello_back_args_ptr);
+		return NULL;
+	}
 
 	//Fill ethernet header
 	ethhdr_ptr = (struct ethhdr *)eth_frame; 
@@ -179,9 +198,9 @@ void *hello_back_handler(void *hello_back_args_ptr)
 	eth_frame_len += sizeof(struct ethhdr);
 
 	//Fill hello header
-	hello_init_hdr.hello_stage = HELLO_STAGE_II;
-	memcpy(hello_init_hdr.hello_src, hello_identity_get(if_macaddr), HELLO_IDENTITY_LEN);
-	memcpy(eth_frame + eth_frame_len, &hello_init_hdr, sizeof(hello_hdr_t));
+	hello_back_hdr.hello_stage = HELLO_STAGE_II;
+	memcpy(hello_back_hdr.hello_src, hello_identity_get(if_macaddr), HELLO_IDENTITY_LEN);
+	memcpy(eth_frame + eth_frame_len, &hello_back_hdr, sizeof(hello_hdr_t));
 	eth_frame_len += sizeof(hello_hdr_t);
 
 	//Fill socket_address
@@ -198,11 +217,11 @@ void *hello_back_handler(void *hello_back_args_ptr)
 }
 
 
-void hello_back(pthread_t *handler_pid, unsigned char hello_port)
+void hello_back(pthread_t *handler_pid, hello_thread_args_t *hello_thread_universal_args)
 {
 	hello_thread_args_t *hello_back_args_ptr;
 	hello_back_args_ptr = malloc(sizeof(hello_thread_args_t));
-	hello_back_args_ptr->hello_port = hello_port;
+	memcpy(hello_back_args_ptr, &hello_thread_universal_args, sizeof(hello_thread_args_t));
 	pthread_create(handler_pid, NULL, &hello_back_handler,  hello_back_args_ptr);
 }
 
@@ -221,3 +240,4 @@ unsigned char *hello_identity_get(unsigned char *buffer)
 {
 	return getmacaddr(hello_if, buffer);
 }
+
