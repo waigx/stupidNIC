@@ -42,6 +42,7 @@
 
 extern int hello_send_raw_socket;
 extern char hello_if[HELLO_IF_NAME_LEN];
+extern uint32_t hello_sequence;
 extern unsigned char hello_mac_addr[6];
 
 static pthread_t handler_pid;
@@ -89,6 +90,7 @@ int main(int argc, char *argv[], char *envp[])
 	hello_thread_universal_args.hello_ngbr_bits = &hello_ngbr_bits;
 	hello_thread_universal_args.hello_payload = hello_ngbr;
 	hello_thread_universal_args.hello_extra = NULL;
+	hello_sequence = 0;
 
 	hello_send_raw_socket = socket(PF_PACKET, SOCK_RAW, htons(ETH_P_ALL)) ;
 	if(hello_send_raw_socket < 0){
@@ -169,15 +171,23 @@ void packet_processor(unsigned char *buffer)
 
 void alarm_hello_init(int signo)
 {
+	hello_thread_args_t *hello_init_args_ptr;
+	hello_init_args_ptr = malloc(sizeof(hello_thread_args_t));
+	memcpy(hello_init_args_ptr, &hello_thread_universal_args, sizeof(hello_thread_args_t));
+
 	sigaction(SIGALRM, &hello_flood, &hello_init);
 	alarm(HELLO_FLOOD_WAIT);
-	pthread_create(&handler_pid, NULL, &hello_init_handler, &hello_thread_universal_args);
+	pthread_create(&handler_pid, NULL, &hello_init_handler, &hello_init_args_ptr);
 }
 
 
 void alarm_hello_flood(int signo)
 {
+	hello_thread_args_t *hello_flood_args_ptr;
+	hello_flood_args_ptr = malloc(sizeof(hello_thread_args_t));
+	memcpy(hello_flood_args_ptr, &hello_thread_universal_args, sizeof(hello_thread_args_t));
+
 	sigaction(SIGALRM, &hello_init, &hello_flood);
 	alarm(HELLO_INIT_INTERVAL - HELLO_FLOOD_WAIT);
-	pthread_create(&handler_pid, NULL, &hello_flood_handler,  &hello_thread_universal_args);
+	pthread_create(&handler_pid, NULL, &hello_flood_handler,  &hello_flood_args_ptr);
 }

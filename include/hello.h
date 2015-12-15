@@ -52,7 +52,7 @@ typedef enum hello_stage {
 typedef struct hello_hdr {
 	unsigned char			hello_src[HELLO_IDENTITY_LEN];
 	hello_stage_t			hello_stage;
-	unsigned int			hello_sequence;
+	uint32_t			hello_sequence;
 	unsigned char			hello_ngbr_bits;
 } hello_hdr_t;
 
@@ -73,6 +73,7 @@ typedef struct hello_thread_args {
 
 int hello_send_raw_socket;
 char hello_if[HELLO_IF_NAME_LEN];
+uint32_t hello_sequence;
 unsigned char hello_mac_addr[6];
 
 void *hello_init_handler(void *);

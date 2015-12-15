@@ -40,6 +40,7 @@
 #include <sys/ioctl.h>
 
 extern int hello_send_raw_socket;
+extern uint32_t hello_sequence;
 extern char hello_if[HELLO_IF_NAME_LEN];
 
 void *hello_init_handler(void *init_hello_args_ptr)
@@ -83,12 +84,66 @@ void *hello_init_handler(void *init_hello_args_ptr)
 	if (sendto(hello_send_raw_socket, eth_frame, eth_frame_len, 0, (struct sockaddr *)&socket_address, sizeof(struct sockaddr_ll)) < 0) {
 		printf("Sendto error, failed to send packets\n");
 	}
+
+	free(init_hello_args_ptr);
+
 	return NULL;
 }
 
 
 void *hello_flood_handler(void *flood_hello_args_ptr)
 {
+	struct sockaddr_ll socket_address;
+	struct ethhdr *ethhdr_ptr;
+	unsigned char eth_frame[HELLO_MAX_PACKET];
+	unsigned int eth_frame_len;
+	unsigned char if_macaddr[6];
+	hello_hdr_t hello_init_hdr;
+
+	pthread_detach(pthread_self());
+	eth_frame_len = 0;
+
+//TODO: Set up the (flood) outbound ports
+// use hello port
+
+	//Get source MAC address
+	if (((hello_thread_args_t *)flood_hello_args_ptr)->hello_extra == NULL) {
+		getmacaddr(hello_if, if_macaddr);
+	} else {
+		memcpy(if_macaddr, ((hello_thread_args_t *)flood_hello_args_ptr)->hello_extra, 6);
+	}
+
+
+	//Fill ethernet header
+	ethhdr_ptr = (struct ethhdr *)eth_frame; 
+	memcpy(ethhdr_ptr->h_dest, hello_mac_addr, 6);
+	memcpy(ethhdr_ptr->h_source, if_macaddr, 6);
+	ethhdr_ptr->h_proto = htons(HELLO_MSG_ETH_TYPE);
+	eth_frame_len += sizeof(struct ethhdr);
+
+	//Fill hello header
+	hello_init_hdr.hello_stage = HELLO_STAGE_III;
+	hello_init_hdr.hello_sequence = htonl(hello_sequence);
+	hello_init_hdr.hello_ngbr_bits = *(((hello_thread_args_t *)flood_hello_args_ptr)->hello_ngbr_bits);
+	memcpy(hello_init_hdr.hello_src, hello_identity_get(if_macaddr), HELLO_IDENTITY_LEN);
+	memcpy(eth_frame + eth_frame_len, &hello_init_hdr, sizeof(hello_hdr_t));
+	eth_frame_len += sizeof(hello_hdr_t);
+
+	//Fill hello payload
+	memcpy(eth_frame + eth_frame_len, ((hello_thread_args_t *)flood_hello_args_ptr)->hello_payload, sizeof(hello_payload_t));
+	eth_frame_len += sizeof(hello_payload_t);
+
+	//Fill socket_address
+	socket_address.sll_ifindex = getifidx(hello_if);
+	socket_address.sll_halen = ETH_ALEN;
+
+	if (sendto(hello_send_raw_socket, eth_frame, eth_frame_len, 0, (struct sockaddr *)&socket_address, sizeof(struct sockaddr_ll)) < 0) {
+		printf("Sendto error, failed to send packets\n");
+	}
+
+	hello_sequence += 1;
+	free(flood_hello_args_ptr);
+
 	return NULL;
 }
 
