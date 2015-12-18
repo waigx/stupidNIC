@@ -102,6 +102,8 @@ void *hello_back_handler(void *hello_back_args_ptr)
 	unsigned char hello_identity[HELLO_IDENTITY_LEN];
 	hello_hdr_t hello_back_hdr;
 	hello_hdr_t *hello_hdr_ptr;
+	bool is_loop;
+	int i;
 
 	pthread_detach(pthread_self());
 	eth_frame_len = 0;
@@ -122,7 +124,14 @@ void *hello_back_handler(void *hello_back_args_ptr)
 	hello_hdr_ptr = (hello_hdr_t *)(((hello_thread_args_t *)hello_back_args_ptr)->hello_recvd_buff + sizeof(struct ethhdr));
 
 	//Return if loop packet detected
-	if (strncmp((char *)(hello_hdr_ptr->hello_src), (char *)(hello_identity), 6) == 0) {
+	is_loop = true;
+	for (i = 0; i < 6; i++) {
+		if ((hello_hdr_ptr->hello_src)[i] != hello_identity[i]) {
+			is_loop = false;
+			break;
+		}
+	}
+	if (is_loop) {
 		free(hello_back_args_ptr);
 		return NULL;
 	}
@@ -164,6 +173,8 @@ void *hello_flood_handler(void *flood_hello_args_ptr)
 	unsigned char if_macaddr[6];
 	hello_hdr_t hello_flood_hdr;
 	hello_hdr_t *hello_hdr_ptr;
+	bool is_loop;
+	int i;
 
 
 	pthread_detach(pthread_self());
@@ -185,11 +196,17 @@ void *hello_flood_handler(void *flood_hello_args_ptr)
 	hello_hdr_ptr = (hello_hdr_t *)(((hello_thread_args_t *)flood_hello_args_ptr)->hello_recvd_buff + sizeof(struct ethhdr));
 
 	//Return if loop packet detected
-	if (strncmp((char *)(hello_hdr_ptr->hello_src), (char *)(hello_identity), 6) == 0) {
+	is_loop = true;
+	for (i = 0; i < 6; i++) {
+		if ((hello_hdr_ptr->hello_src)[i] != hello_identity[i]) {
+			is_loop = false;
+			break;
+		}
+	}
+	if (is_loop) {
 		free(flood_hello_args_ptr);
 		return NULL;
 	}
-
 
 	//Fill ethernet header
 	ethhdr_ptr = (struct ethhdr *)eth_frame; 
