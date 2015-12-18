@@ -44,7 +44,6 @@ extern int hello_send_raw_socket;
 extern uint32_t hello_sequence;
 extern char hello_if[HELLO_IF_NAME_LEN];
 
-bool _is_eth_loop(hello_thread_args_t *);
 
 
 void *hello_init_handler(void *init_hello_args_ptr)
@@ -115,12 +114,6 @@ void *hello_back_handler(void *hello_back_args_ptr)
 		getmacaddr(hello_if, if_macaddr);
 	} else {
 		memcpy(if_macaddr, ((hello_thread_args_t *)hello_back_args_ptr)->hello_extra, 6);
-	}
-
-	//Return if loop detected
-	if (_is_eth_loop(hello_back_args_ptr)) {
-		free(hello_back_args_ptr);
-		return NULL;
 	}
 
 	//Fill ethernet header
@@ -225,9 +218,6 @@ void hello_back(pthread_t *handler_pid, hello_thread_args_t *hello_thread_univer
 
 void hello_update_neighbor(hello_thread_args_t * hello_args_ptr)
 {
-	if (_is_eth_loop(hello_args_ptr))
-		return;
-
 	hello_hdr_t *hello_hdr_ptr;
 	*(hello_args_ptr->hello_ngbr_bits) |= (1 << hello_args_ptr->hello_port);
 	hello_hdr_ptr = (hello_hdr_t *)(hello_args_ptr->hello_recvd_buff + sizeof(struct ethhdr));
@@ -242,7 +232,7 @@ unsigned char *hello_identity_get(unsigned char *buffer)
 }
 
 
-bool _is_eth_loop(hello_thread_args_t * hello_args_ptr)
+bool hello_is_loop(hello_thread_args_t * hello_args_ptr)
 {
 	bool is_loop;
 	int i;

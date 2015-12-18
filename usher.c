@@ -147,16 +147,22 @@ void packet_processor(unsigned char *buffer)
 	hello_hdr_t *hello_hdr_ptr;
 
 	hello_hdr_ptr = (hello_hdr_t *)(buffer + sizeof(struct ethhdr));
+	if (hello_is_loop(&hello_thread_universal_args))
+		return;
+
 	switch (hello_hdr_ptr->hello_stage){
 		case HELLO_STAGE_I:
+			printf("I\n");
 			hello_back(&handler_pid, &hello_thread_universal_args);
 			break;
 
 		case HELLO_STAGE_II:
+			printf("II\n");
 			hello_update_neighbor(&hello_thread_universal_args);
 			break;
 
 		case HELLO_STAGE_III:
+			printf("III\n");
 // TODO: Ignore HELLO_STAGE_III packets on a stupidNIC machine
 //			update_topo(buffer);
 			break;

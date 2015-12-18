@@ -80,6 +80,8 @@ void *hello_init_handler(void *);
 void *hello_flood_handler(void *);
 void *hello_back_handler(void *);
 
+bool hello_is_loop(hello_thread_args_t *);
+
 void hello_back(pthread_t *, hello_thread_args_t *);
 void hello_update_neighbor(hello_thread_args_t *);
 
