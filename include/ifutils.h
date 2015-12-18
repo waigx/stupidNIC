@@ -26,6 +26,7 @@
 
 int getifidx(const char *);
 unsigned char *getmacaddr(const char *, unsigned char *);
+void dumpmacaddr(unsigned char *);
 
 #endif
 

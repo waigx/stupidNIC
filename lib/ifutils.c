@@ -75,3 +75,15 @@ unsigned char *getmacaddr(const char *if_name, unsigned char *buffer)
 
 	return buffer;
 }
+
+
+void dumpmacaddr(unsigned char *buffer)
+{
+	int i;
+	for (i = 0; i < 6; i++) {
+		printf("%.2X:", buffer[i]);
+	}
+	printf("\b \n");
+
+	return;
+}
