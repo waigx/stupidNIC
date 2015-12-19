@@ -54,6 +54,7 @@ void _dump_nghr_info(hello_thread_args_t * hello_args_ptr)
 	printf("---\n");
 }
 
+
 void *hello_init_handler(void *init_hello_args_ptr)
 {
 	struct sockaddr_ll socket_address;

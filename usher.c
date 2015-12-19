@@ -104,7 +104,6 @@ int main(int argc, char *argv[], char *envp[])
 		return 1;
 	}
 
-
 	sigaction(SIGALRM, &hello_init, NULL);
 	alarm(HELLO_INIT_INTERVAL);
 
@@ -152,17 +151,14 @@ void packet_processor(unsigned char *buffer)
 
 	switch (hello_hdr_ptr->hello_stage){
 		case HELLO_STAGE_I:
-			printf("I\n");
 			hello_back(&handler_pid, &hello_thread_universal_args);
 			break;
 
 		case HELLO_STAGE_II:
-			printf("II\n");
 			hello_update_neighbor(&hello_thread_universal_args);
 			break;
 
 		case HELLO_STAGE_III:
-			printf("III\n");
 // TODO: Ignore HELLO_STAGE_III packets on a stupidNIC machine
 //			update_topo(buffer);
 			break;
