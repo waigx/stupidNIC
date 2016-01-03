@@ -27,6 +27,12 @@
 #include <skewedhashtable.h>
 
 
+/*
+ * The idea of these hash functions came from paper:
+ * 'Skewed-associative caches', Seznec & Bodin
+ *
+ */ 
+
 uint64_t __shtable_hash(uint64_t idx)
 {
 	idx = idx & ((1 << SHTABLE_IDX_BITS) - 1);
@@ -68,20 +74,20 @@ uint64_t shtable_idxhash_b(uint64_t idx)
 	return  __shtable_hash(part_a1) ^ __shtable_hash_r(part_a2) ^ part_a1;
 }
 
+
+/*
+ * 
+ * Following figure shows an entry in the hashtable
+ * |--------------|------------|------------|
+ * |    Value     |     tag    | hashed key |
+ * |--------------|------------|------------|
+ *                                   /|\
+ *                                    |
+ *                                  Here stored hash value of another table
+ * 
+ */
 uint64_t _shtable_set_helper(shtable_interfaces_t * shti, uint64_t idxhash_a, uint64_t idxhash_b, uint64_t tag, uint64_t value, uint64_t tried)
 {
-	/**
-	 * 
-	 * Following figure shows an entry in the hashtable
-	 * |--------------|------------|------------|
-	 * |    Value     |     tag    | hashed key |
-	 * |--------------|------------|------------|
-	 *                                   /|\
-	 *                                    |
-	 *                                  Here stored hash value of another table
-	 * 
-	 */
-
 	uint64_t old_entry;
 
 	value = (value << SHTABLE_TAG_BITS) | tag;
@@ -95,10 +101,12 @@ uint64_t _shtable_set_helper(shtable_interfaces_t * shti, uint64_t idxhash_a, ui
 		if (tried > SHTABLE_MAX_TRY) {
 			return -1;
 		}
+		// If tried odd times, swap out the entry in table a, then put it in table b
 		if (tried & 1){
 			old_entry = shti->getentry(shti->table_a, idxhash_a);
 			value = (value << SHTABLE_IDX_BITS) | idxhash_b;
 			shti->setentry(shti->table_a, idxhash_a, value);
+			// Get the key hash value of table b
 			idxhash_b = old_entry & ((1 << SHTABLE_IDX_BITS) - 1);
 		} else {
 			old_entry = shti->getentry(shti->table_b, idxhash_b);
@@ -106,6 +114,7 @@ uint64_t _shtable_set_helper(shtable_interfaces_t * shti, uint64_t idxhash_a, ui
 			shti->setentry(shti->table_b, idxhash_b, value);
 			idxhash_a = old_entry & ((1 << SHTABLE_IDX_BITS) - 1);
 		}
+		// Get the value in the old entry
 		old_entry = old_entry >> SHTABLE_IDX_BITS;
 		tag = old_entry & ((1 << SHTABLE_TAG_BITS) - 1);
 		old_entry = old_entry >> SHTABLE_TAG_BITS;
