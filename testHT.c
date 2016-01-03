@@ -21,6 +21,8 @@
  */
 
 
+#include <unistd.h>
+
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
@@ -54,9 +56,19 @@ void dump_bin(uint64_t idx)
 	return;
 }
 
+void dump_ety(uint64_t entry)
+{
+	printf("%llu ", (long long unsigned int)(entry >> (SHTABLE_IDX_BITS + SHTABLE_TAG_BITS)));
+	printf("%llu ", (long long unsigned int)((entry >> (SHTABLE_IDX_BITS )) & ((1 << SHTABLE_TAG_BITS) - 1)));
+	printf("%llu", (long long unsigned int)(entry  & ((1 << SHTABLE_IDX_BITS) - 1)));
+}
 
 int main(int argc, char *argv[], char *envp[])
 {
+	char op;
+	uint64_t key;
+	uint64_t val;
+	int i;
 	uint64_t table_a[TABLE_SIZE] = {0};
 	uint64_t table_b[TABLE_SIZE] = {0};
 	shtable_interfaces_t shti;
@@ -68,15 +80,37 @@ int main(int argc, char *argv[], char *envp[])
 	shti.getentry = get_entry;
 	shti.setentry = set_entry;
 	
-	shtable_set(&shti, 0xfbfff, 123);
-	shtable_set(&shti, 0xfbbff, 124);
-	shtable_set(&shti, 0xfbaff, 125);
-	shtable_set(&shti, 0xfbabf, 125);
-	shtable_set(&shti, 0xffabf, 125);
-	shtable_set(&shti, 0xafabf, 125);
-	shtable_set(&shti, 0x11111, 125);
-	shtable_set(&shti, 0x11ab2, 125);
-	printf("%d\n", (int)shtable_get(&shti, 0x11ab2));
+	printf("Input mode (w, r, d, q): ");
+	while (1) {
+		switch ((op = getchar())) {
+		case 'w':
+			printf("Input [key, value]: ");
+			scanf("%p, %d", (void **)&key, (int *)&val);
+			shtable_set(&shti, key, val);
+			break;
+		case 'r':
+			printf("Input [key]: ");
+			scanf("%p", (void **)&key);
+			printf("%d\n", (int)shtable_get(&shti, key));
+			break;
+		case 'd':
+			printf("--Table A--\t\t--Table B--\n");
+			for (i = 0; i < TABLE_SIZE; i ++) {
+				dump_ety(table_a[i]);
+				printf("\t\t\t");
+				dump_ety(table_b[i]);
+				printf("\n");
+			}
+			break;
+		case 'q':
+			return 0;
+			break;
+		default:
+			printf("Input mode (w, r, d): ");
+			break;
+		}
+	}
+	printf("%d\n", (int)shtable_get(&shti, 0xfbbff));
 
 	return 0;
 }
