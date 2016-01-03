@@ -30,6 +30,7 @@
 #define SHTABLE_IDX_BITS			8
 #define SHTABLE_TAG_BITS			8
 #define SHTABLE_KEY_BITS		       48
+#define SHTABLE_MAX_TRY			       99
 
 
 typedef struct shtable_interfaces {
@@ -42,8 +43,8 @@ typedef struct shtable_interfaces {
 } shtable_interfaces_t;
 
 
-uint64_t _shtable_idxhash_a(uint64_t);
-uint64_t _shtable_idxhash_b(uint64_t);
+uint64_t shtable_idxhash_a(uint64_t);
+uint64_t shtable_idxhash_b(uint64_t);
 
 uint64_t shtable_set(shtable_interfaces_t *, uint64_t, uint64_t);
 uint64_t shtable_get(shtable_interfaces_t *, uint64_t);
