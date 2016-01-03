@@ -70,10 +70,21 @@ uint64_t shtable_idxhash_b(uint64_t idx)
 
 uint64_t _shtable_set_helper(shtable_interfaces_t * shti, uint64_t idxhash_a, uint64_t idxhash_b, uint64_t tag, uint64_t value, uint64_t tried)
 {
+	/**
+	 * 
+	 * Following figure shows an entry in the hashtable
+	 * |--------------|------------|------------|
+	 * |    Value     |     tag    | hashed key |
+	 * |--------------|------------|------------|
+	 *                                   /|\
+	 *                                    |
+	 *                                  Here stored hash value of another table
+	 * 
+	 */
+
 	uint64_t old_entry;
 
 	value = (value << SHTABLE_TAG_BITS) | tag;
-	printf("%d\n", (int)tried);
 	if (shti->getentry(shti->table_a, idxhash_a) == 0) {
 		value = (value << SHTABLE_IDX_BITS) | idxhash_b;
 		shti->setentry(shti->table_a, idxhash_a, value);

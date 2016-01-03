@@ -34,15 +34,18 @@
 
 
 typedef struct shtable_interfaces {
+	// define two tables for storage
 	void * table_a;
 	void * table_b;
+	// define two hash functions for index hash
 	uint64_t (*idxhash_a)(uint64_t idx);
 	uint64_t (*idxhash_b)(uint64_t idx);
+	// define how to set/get entry from table
 	uint64_t (*getentry)(void *table, uint64_t idx);
 	uint64_t (*setentry)(void *table, uint64_t idx, uint64_t entry);
 } shtable_interfaces_t;
 
-
+// Provided two hash functions
 uint64_t shtable_idxhash_a(uint64_t);
 uint64_t shtable_idxhash_b(uint64_t);
 
