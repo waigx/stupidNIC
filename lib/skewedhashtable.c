@@ -44,18 +44,27 @@ uint64_t _shtable_idxhash_a(uint64_t idx)
 {
 	uint64_t part_a1;
 	uint64_t part_a2;
-	part_a1 = (idx >> SHTABLE_TAG_BITS) & ((1 << SHTABLE_IDX_BITS) - 1);
-	part_a2 = (idx >> SHTABLE_IDX_BITS >> SHTABLE_TAG_BITS) & ((1 << SHTABLE_IDX_BITS) - 1);
-	return __shtable_hash(part_a1) ^ __shtable_hash_r(part_a2) ^ part_a2;
+	int i;
+	part_a1 = idx & ((1 << SHTABLE_IDX_BITS) - 1);
+	for (i = 1; i < SHTABLE_KEY_BITS / SHTABLE_IDX_BITS; i++) {
+		part_a2 = (idx >> (SHTABLE_IDX_BITS * i)) & ((1 << SHTABLE_IDX_BITS) - 1);
+		part_a1 =  __shtable_hash(part_a1) ^ __shtable_hash_r(part_a2) ^ part_a2;
+	}
+	part_a2 = (idx >> (SHTABLE_KEY_BITS - SHTABLE_IDX_BITS)) & ((1 << SHTABLE_IDX_BITS) - 1);
+	return  __shtable_hash(part_a1) ^ __shtable_hash_r(part_a2) ^ part_a2;
 }
 
 uint64_t _shtable_idxhash_b(uint64_t idx)
 {
 	uint64_t part_a1;
 	uint64_t part_a2;
-	part_a1 = (idx >> SHTABLE_TAG_BITS) & ((1 << SHTABLE_IDX_BITS) - 1);
-	part_a2 = (idx >> SHTABLE_IDX_BITS >> SHTABLE_TAG_BITS) & ((1 << SHTABLE_IDX_BITS) - 1);
-	return __shtable_hash(part_a1) ^ __shtable_hash_r(part_a2) ^ part_a1;
+	int i;
+	part_a1 = idx & ((1 << SHTABLE_IDX_BITS) - 1);
+	for (i = 1; i < SHTABLE_KEY_BITS / SHTABLE_IDX_BITS; i++) {
+		part_a2 = (idx >> (SHTABLE_IDX_BITS * i)) & ((1 << SHTABLE_IDX_BITS) - 1);
+		part_a1 =  __shtable_hash(part_a1) ^ __shtable_hash_r(part_a2) ^ part_a1;	}
+	part_a2 = (idx >> (SHTABLE_KEY_BITS - SHTABLE_IDX_BITS)) & ((1 << SHTABLE_IDX_BITS) - 1);
+	return  __shtable_hash(part_a1) ^ __shtable_hash_r(part_a2) ^ part_a1;
 }
 
 uint64_t shtable_set(shtable_interfaces_t * shti, uint64_t key, uint64_t value)
