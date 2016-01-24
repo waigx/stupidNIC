@@ -173,15 +173,16 @@ uint64_t shtable_set(shtable_interfaces_t * shti, uint64_t key, uint64_t value)
 	idxhash_b = shti->idxhash_b(key);
 	table = _shtable_get_helper(shti, idxhash_a, idxhash_b, tag);
 
-	if (table == shti->idxhash_a) {
+	if (table == shti->table_a) {
 		entry = (tagged_value << SHTABLE_IDX_BITS) | idxhash_b;
 		shti->setentry(shti->table_a, idxhash_a, entry);
-	} else if (table == shti->idxhash_b) {
+	} else if (table == shti->table_b) {
 		entry = (tagged_value << SHTABLE_IDX_BITS) | idxhash_a;
 		shti->setentry(shti->table_b, idxhash_b, entry);
 	} else {
 		return _shtable_set_helper(shti, idxhash_a, idxhash_b, tagged_value, 0);
 	}
+
 	return 0;
 }
 
