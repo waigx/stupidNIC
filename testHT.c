@@ -29,9 +29,9 @@
 #include <string.h>
 #include <time.h>
 
-#include <skewedhashtable.h>
+#include <cuckoohash.h>
 
-#define TABLE_SIZE (1 << SHTABLE_IDX_BITS)
+#define TABLE_SIZE (1 << CKHTABLE_IDX_BITS)
 #define TEST_TIMES 10000
 
 
@@ -61,30 +61,31 @@ void dump_bin(uint64_t idx)
 
 void dump_ety(uint64_t entry)
 {
-	printf("%llu ", (long long unsigned int)(entry >> (SHTABLE_KEY_BITS)));
-	printf("%llu ", (long long unsigned int)((entry & ((1UL << SHTABLE_KEY_BITS) - 1))));
+	printf("%llu ", (long long unsigned int)(entry >> (CKHTABLE_KEY_BITS)));
+	printf("%llu ", (long long unsigned int)((entry & ((1UL << CKHTABLE_KEY_BITS) - 1))));
 }
 
 float tableBenchmark(uint64_t * collision_times)
 {
-	int i, a, b, j;
+	int i, j;
+	int upper, lower;
 	uint64_t table_a[TABLE_SIZE] = {0};
 	uint64_t table_b[TABLE_SIZE] = {0};
 	uint64_t table_c[TABLE_SIZE] = {0};
 	uint64_t table_d[TABLE_SIZE] = {0};
 	int times;
-	shtable_interfaces_t shti;
+	ckhtable_interfaces_t ckhti;
 
-	shti.table_a = table_a;
-	shti.table_b = table_b;
-	shti.table_c = table_c;
-	shti.table_d = table_d;
-	shti.idxhash_a = shtable_idxhash_a;
-	shti.idxhash_b = shtable_idxhash_b;
-	shti.idxhash_c = shtable_idxhash_c;
-	shti.idxhash_d = shtable_idxhash_d;
-	shti.getentry = get_entry;
-	shti.setentry = set_entry;
+	ckhti.table_a = table_a;
+	ckhti.table_b = table_b;
+	ckhti.table_c = table_c;
+	ckhti.table_d = table_d;
+	ckhti.idxhash_a = ckhtable_idxhash_a;
+	ckhti.idxhash_b = ckhtable_idxhash_b;
+	ckhti.idxhash_c = ckhtable_idxhash_c;
+	ckhti.idxhash_d = ckhtable_idxhash_d;
+	ckhti.getentry = get_entry;
+	ckhti.setentry = set_entry;
 	
 	times = TEST_TIMES;
 	srand(time(NULL));
@@ -94,10 +95,10 @@ float tableBenchmark(uint64_t * collision_times)
 		memset(table_c, 0, sizeof(uint64_t) * TABLE_SIZE);
 		memset(table_d, 0, sizeof(uint64_t) * TABLE_SIZE);
 		for (i = 1; i < 1 + TABLE_SIZE * 4; i++) {
-			if (shtable_set(&shti, rand(), rand()) != 0) {
-				a = i * 100 / (TABLE_SIZE * 4);
-				b = (i+1) * 100 / (TABLE_SIZE * 4);
-				for (j = a; j < b; j++) {
+			if (ckhtable_set(&ckhti, rand(), rand()) != 0) {
+				lower = i * 100 / (TABLE_SIZE * 4);
+				upper = (i+1) * 100 / (TABLE_SIZE * 4);
+				for (j = lower; j < upper; j++) {
 					collision_times[j] += 1;
 				}
 			}
@@ -130,18 +131,18 @@ int main(int argc, char *argv[], char *envp[])
 	uint64_t table_b[TABLE_SIZE] = {0};
 	uint64_t table_c[TABLE_SIZE] = {0};
 	uint64_t table_d[TABLE_SIZE] = {0};
-	shtable_interfaces_t shti;
+	ckhtable_interfaces_t ckhti;
 
-	shti.table_a = table_a;
-	shti.table_b = table_b;
-	shti.table_c = table_c;
-	shti.table_d = table_d;
-	shti.idxhash_a = shtable_idxhash_a;
-	shti.idxhash_b = shtable_idxhash_b;
-	shti.idxhash_c = shtable_idxhash_c;
-	shti.idxhash_d = shtable_idxhash_d;
-	shti.getentry = get_entry;
-	shti.setentry = set_entry;
+	ckhti.table_a = table_a;
+	ckhti.table_b = table_b;
+	ckhti.table_c = table_c;
+	ckhti.table_d = table_d;
+	ckhti.idxhash_a = ckhtable_idxhash_a;
+	ckhti.idxhash_b = ckhtable_idxhash_b;
+	ckhti.idxhash_c = ckhtable_idxhash_c;
+	ckhti.idxhash_d = ckhtable_idxhash_d;
+	ckhti.getentry = get_entry;
+	ckhti.setentry = set_entry;
 
 	uint64_t collision_times[101] = {0};
 	tableBenchmark(collision_times);
@@ -156,13 +157,13 @@ int main(int argc, char *argv[], char *envp[])
 		case 'w':
 			printf("Input [key, value]: ");
 			scanf("%p, %d", (void **)&key, (int *)&val);
-			if (shtable_set(&shti, key, val) != 0)
+			if (ckhtable_set(&ckhti, key, val) != 0)
 				printf("Write failed!\n");
 			break;
 		case 'r':
 			printf("Input [key]: ");
 			scanf("%p", (void **)&key);
-			printf("%d\n", (int)shtable_get(&shti, key));
+			printf("%d\n", (int)ckhtable_get(&ckhti, key));
 			break;
 		case 'd':
 			printf("--Table A--\t\t--Table B--\t\t--Table C--\t\t--Table D--\n");
@@ -185,7 +186,7 @@ int main(int argc, char *argv[], char *envp[])
 			break;
 		}
 	}
-	printf("%d\n", (int)shtable_get(&shti, 0xfbbff));
+	printf("%d\n", (int)ckhtable_get(&ckhti, 0xfbbff));
 
 	return 0;
 }

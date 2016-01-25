@@ -21,18 +21,18 @@
  */
 
 
-#ifndef __SKEWEDHASHTABLE_H
-#define __SKEWEDHASHTABLE_H
+#ifndef __CUCKOOHASH_H
+#define __CUCKOOHASH_H
 
 #include <stdint.h>
 
 
-#define SHTABLE_IDX_BITS			8
-#define SHTABLE_KEY_BITS		       48
-#define SHTABLE_MAX_TRY			      128
+#define CKHTABLE_IDX_BITS			6
+#define CKHTABLE_KEY_BITS		       48
+#define CKHTABLE_MAX_TRY		      256
 
 
-typedef struct shtable_interfaces {
+typedef struct ckhtable_interfaces {
 	// define four tables for storage
 	void * table_a;
 	void * table_b;
@@ -46,16 +46,16 @@ typedef struct shtable_interfaces {
 	// define how to set/get entry from table
 	uint64_t (*getentry)(void *table, uint64_t idx);
 	uint64_t (*setentry)(void *table, uint64_t idx, uint64_t entry);
-} shtable_interfaces_t;
+} ckhtable_interfaces_t;
 
-// Provided two hash functions
-uint64_t shtable_idxhash_a(uint64_t);
-uint64_t shtable_idxhash_b(uint64_t);
-uint64_t shtable_idxhash_c(uint64_t);
-uint64_t shtable_idxhash_d(uint64_t);
+// Provided four hash functions
+uint64_t ckhtable_idxhash_a(uint64_t);
+uint64_t ckhtable_idxhash_b(uint64_t);
+uint64_t ckhtable_idxhash_c(uint64_t);
+uint64_t ckhtable_idxhash_d(uint64_t);
 
-uint64_t shtable_set(shtable_interfaces_t *, uint64_t, uint64_t);
-uint64_t shtable_get(shtable_interfaces_t *, uint64_t);
+uint64_t ckhtable_set(ckhtable_interfaces_t *, uint64_t, uint64_t);
+uint64_t ckhtable_get(ckhtable_interfaces_t *, uint64_t);
 
 
 #endif
