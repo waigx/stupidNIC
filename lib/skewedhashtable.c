@@ -153,7 +153,7 @@ uint64_t _shtable_set_helper(shtable_interfaces_t * shti, uint64_t idxhash_a, ui
 			idxhash_a = old_entry & ((1 << SHTABLE_IDX_BITS) - 1);
 		}
 
-		_shtable_set_helper(shti, idxhash_a, idxhash_b, old_entry >> SHTABLE_IDX_BITS, tried + 1);
+		return _shtable_set_helper(shti, idxhash_a, idxhash_b, old_entry >> SHTABLE_IDX_BITS, tried + 1);
 	}
 	return 0;
 }
@@ -182,7 +182,6 @@ uint64_t shtable_set(shtable_interfaces_t * shti, uint64_t key, uint64_t value)
 	} else {
 		return _shtable_set_helper(shti, idxhash_a, idxhash_b, tagged_value, 0);
 	}
-
 	return 0;
 }
 
