@@ -145,7 +145,7 @@ int main(int argc, char *argv[], char *envp[])
 
 	uint64_t collision_times[101] = {0};
 	tableBenchmark(collision_times);
-	for (i=1; i<101; i++) {
+	for (i=1; i<100; i++) {
 		printf("%d %f\n", i, 1.0*collision_times[i]/TEST_TIMES);
 	}
 	return 0;

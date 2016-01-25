@@ -27,7 +27,7 @@
 #include <stdint.h>
 
 
-#define SHTABLE_IDX_BITS			4
+#define SHTABLE_IDX_BITS			8
 #define SHTABLE_KEY_BITS		       48
 #define SHTABLE_MAX_TRY			      128
 
