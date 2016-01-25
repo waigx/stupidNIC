@@ -29,7 +29,7 @@
 
 #define SHTABLE_IDX_BITS			4
 #define SHTABLE_KEY_BITS		       48
-#define SHTABLE_MAX_TRY			       99
+#define SHTABLE_MAX_TRY			      128
 
 
 typedef struct shtable_interfaces {
