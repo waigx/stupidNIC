@@ -58,9 +58,15 @@ bool _is_unliked_node(nettopo_node_t * node)
 }
 
 
+void _insert_node_to_graph(nettopo_node_t * node)
+{
+	// TODO
+}
+
+
 void _remove_node_from_graph(nettopo_node_t * node)
 {
-	//TODO
+	// TODO
 }
 
 
@@ -71,6 +77,12 @@ nettopo_node_t * _get_node_by_idtt(unsigned char * node_idtt, nettopo_node_t ** 
 		if (_is_same_node_idtt(node_array[i]->topo_idtt, node_idtt) == true)
 			return node_array[i];
 	return NULL;
+}
+
+
+void _run_dijkstra(nettopo_node_t * start_node, nettopo_graph_t * graph)
+{
+	// TODO
 }
 
 
@@ -88,8 +100,8 @@ int nettopo_update_graph(unsigned char * node_idtt, unsigned char * raw_ngbr_idt
 		memcpy(stock_node->topo_idtt, node_idtt, HELLO_IDENTITY_LEN);
 		for (i = 0; i < HELLO_MAX_NEIGHBOR; i++)
 			stock_node->topo_ngbr[i] = NULL;
-		// TODO: Insert new into current graph
-
+		// Insert new node into current graph
+		_insert_node_to_graph(stock_node);
 	} else {
 		for (i = 0; i < HELLO_MAX_NEIGHBOR; i++) {
 			// Clean orginal node pairs information
@@ -106,7 +118,18 @@ int nettopo_update_graph(unsigned char * node_idtt, unsigned char * raw_ngbr_idt
 			}
 		}
 	}
-	// TODO: Updates all pairs informations
+	// Updates all pairs informations
+	for (i = 0; i < HELLO_MAX_NEIGHBOR; i++) {
+		temp_node = _get_node_by_idtt(raw_ngbr_idtts + i * HELLO_IDENTITY_LEN, nettopo_graph.topo_nodes, nettopo_graph.topo_nodes_number);
+		if (temp_node == NULL) {
+			temp_node = malloc(sizeof(nettopo_node_t));	
+			memcpy(temp_node->topo_idtt, raw_ngbr_idtts + i * HELLO_IDENTITY_LEN, HELLO_IDENTITY_LEN);
+			_insert_node_to_graph(temp_node);
+		}
+		// Update node pairing information
+		temp_node->topo_ngbr[(uint8_t)(raw_ngbr_outbound_ports[i])] = stock_node;
+		stock_node->topo_ngbr[i] = temp_node;
+	}
 
 	return 0;
 }
