@@ -83,7 +83,7 @@ void dumpmacaddr(unsigned char *buffer)
 	for (i = 0; i < 6; i++) {
 		printf("%.2X:", buffer[i]);
 	}
-	printf("\b \n");
+	printf("\b ");
 
 	return;
 }

@@ -49,7 +49,10 @@ void _dump_nghr_info(hello_thread_args_t * hello_args_ptr)
 {
 	int i;
 	for (i = 0; i < HELLO_MAX_NEIGHBOR; i++) {
-		dumpmacaddr(hello_args_ptr->hello_payload + i * 6);
+		printf("Port #%d <---> ", i);
+		printf("Port #%hhu of ", *(hello_args_ptr->hello_payload + HELLO_MAX_NEIGHBOR * HELLO_IDENTITY_LEN + i));
+		dumpmacaddr(hello_args_ptr->hello_payload + i * HELLO_IDENTITY_LEN);
+		printf("\n");
 	}
 	printf("---\n");
 }
@@ -115,7 +118,7 @@ void *hello_back_handler(void *hello_back_args_ptr)
 	pthread_detach(pthread_self());
 	eth_frame_len = 0;
 
-//TODO: Set up the outbound port (equal to imcomming port)
+//TODO: Set up the outbound port (equal to incomming port)
 // use hello port
 
 	//Get source MAC address
@@ -134,6 +137,7 @@ void *hello_back_handler(void *hello_back_args_ptr)
 
 	//Fill hello header
 	hello_back_hdr.hello_stage = HELLO_STAGE_II;
+	hello_back_hdr.hello_outbound_port = ((hello_thread_args_t *)hello_back_args_ptr)->hello_inbound_port;
 	memcpy(hello_back_hdr.hello_src, hello_identity_get(if_macaddr), HELLO_IDENTITY_LEN);
 	memcpy(eth_frame + eth_frame_len, &hello_back_hdr, sizeof(hello_hdr_t));
 	eth_frame_len += sizeof(hello_hdr_t);
@@ -222,9 +226,10 @@ void hello_back(pthread_t *handler_pid, hello_thread_args_t *hello_thread_univer
 void hello_update_neighbor(hello_thread_args_t * hello_args_ptr)
 {
 	hello_hdr_t *hello_hdr_ptr;
-	*(hello_args_ptr->hello_ngbr_bits) |= (1 << hello_args_ptr->hello_port);
+	*(hello_args_ptr->hello_ngbr_bits) |= (1 << hello_args_ptr->hello_inbound_port);
 	hello_hdr_ptr = (hello_hdr_t *)(hello_args_ptr->hello_recvd_buff + sizeof(struct ethhdr));
-	memcpy(hello_args_ptr->hello_payload + (HELLO_IDENTITY_LEN) * hello_args_ptr->hello_port, hello_hdr_ptr->hello_src, HELLO_IDENTITY_LEN);
+	memcpy(hello_args_ptr->hello_payload + (HELLO_IDENTITY_LEN) * hello_args_ptr->hello_inbound_port, hello_hdr_ptr->hello_src, HELLO_IDENTITY_LEN);
+	*(((hello_payload_t *)(hello_args_ptr->hello_payload))->hello_payload_extra + hello_args_ptr->hello_inbound_port) = hello_hdr_ptr->hello_outbound_port;
 	_dump_nghr_info(hello_args_ptr);
 	return;
 }

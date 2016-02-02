@@ -170,7 +170,7 @@ void packet_processor(unsigned char *buffer)
 	return;
 }
 
-
+// TODO: Clean up neighbor information after HELLO_FLOOD_WAIT
 void alarm_hello_init(int signo)
 {
 	hello_thread_args_t *hello_init_args_ptr;

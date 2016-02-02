@@ -25,6 +25,7 @@
 #define __HELLO_H
 
 #include <pthread.h>
+#include <stdbool.h>
 #include <stdint.h>
 
 
@@ -54,11 +55,13 @@ typedef struct hello_hdr {
 	hello_stage_t			hello_stage;
 	uint32_t			hello_sequence;
 	unsigned char			hello_ngbr_bits;
+	unsigned char			hello_outbound_port;
 } hello_hdr_t;
 
 
 typedef struct hello_payload {
 	unsigned char			hello_payload[HELLO_MAX_NEIGHBOR * HELLO_IDENTITY_LEN];
+	unsigned char			hello_payload_extra[HELLO_MAX_NEIGHBOR];
 } hello_payload_t;
 
 
@@ -67,7 +70,7 @@ typedef struct hello_thread_args {
 	unsigned char *			hello_ngbr_bits;
 	unsigned char *			hello_payload;
 	unsigned char *			hello_extra;
-	unsigned char			hello_port;
+	unsigned char			hello_inbound_port;
 } hello_thread_args_t;
 
 
