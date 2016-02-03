@@ -21,31 +21,11 @@
  */
 
 
-#ifndef __NETTOPO_H
-#define __NETTOPO_H
+#ifndef __NETTOPOUTILS_H
+#define __NETTOPOUTILS_H
 
-#include <hello.h>
-#include <stdint.h>
+#include <nettopo.h>
 
-
-#define NETTOPO_MAX_NODE				    32
-#define NETTOPO_DEFAULT_WEIGTH				     1
-
-
-typedef struct nettopo_node {
-	unsigned char			topo_idtt[HELLO_IDENTITY_LEN];
-	struct nettopo_node *		topo_ngbr[HELLO_MAX_NEIGHBOR];
-} nettopo_node_t;
-
-
-typedef struct nettopo_graph {
-	uint64_t			topo_nodes_number;
-	nettopo_node_t *		topo_nodes[NETTOPO_MAX_NODE];
-	nettopo_node_t *		topo_next_hop[NETTOPO_MAX_NODE];
-} nettopo_graph_t;
-
-nettopo_graph_t nettopo_graph;
-int nettopo_update_graph(unsigned char *, unsigned char *, unsigned char *);
-void nettopo_run_dijkstra(nettopo_graph_t *, nettopo_node_t *);
+void nttutil_dump_graph(nettopo_graph_t *);
 
 #endif

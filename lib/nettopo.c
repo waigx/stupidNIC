@@ -107,8 +107,6 @@ int _insert_node_to_graph(nettopo_node_t * node)
 	nettopo_graph.topo_next_hop[nettopo_graph.topo_nodes_number] = NULL;
 	nettopo_graph.topo_nodes_number += 1;
 
-	free(node);
-
 	return 0;
 }
 
@@ -135,11 +133,13 @@ int _remove_node_from_graph(nettopo_node_t * node)
 	nettopo_graph.topo_nodes[i] = NULL;
 	nettopo_graph.topo_nodes_number -= 1;
 
+	free(node);
+
 	return 0;
 }
 
 
-void nettopo_run_dijkstra(nettopo_node_t * start_node, nettopo_graph_t * graph)
+void nettopo_run_dijkstra(nettopo_graph_t * graph, nettopo_node_t * start_node)
 {
 	int i;
 	int current_node_idx;
