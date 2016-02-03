@@ -68,6 +68,20 @@ nettopo_node_t * _get_node_by_idtt(unsigned char * node_idtt, nettopo_node_t ** 
 }
 
 
+nettopo_node_t * _create_new_node(unsigned char * node_idtt)
+{
+	int i;
+	nettopo_node_t * node;
+
+	node = malloc(sizeof(nettopo_node_t));	
+	memcpy(node->topo_idtt, node_idtt, HELLO_IDENTITY_LEN);
+	for (i = 0; i < HELLO_MAX_NEIGHBOR; i++)
+		node->topo_ngbr[i] = NULL;
+
+	return node;
+}
+
+
 int _insert_node_to_graph(nettopo_node_t * node)
 {
 	nettopo_node_t * stock_node;
@@ -129,10 +143,7 @@ int nettopo_update_graph(unsigned char * node_idtt, unsigned char * raw_ngbr_idt
 
 	if (stock_node == NULL) {
 		// If the node does not exist in the graph, create a new one
-		stock_node = malloc(sizeof(nettopo_node_t));	
-		memcpy(stock_node->topo_idtt, node_idtt, HELLO_IDENTITY_LEN);
-		for (i = 0; i < HELLO_MAX_NEIGHBOR; i++)
-			stock_node->topo_ngbr[i] = NULL;
+		stock_node = _create_new_node(node_idtt);
 		// Insert new node into current graph
 		_insert_node_to_graph(stock_node);
 	} else {
@@ -154,10 +165,13 @@ int nettopo_update_graph(unsigned char * node_idtt, unsigned char * raw_ngbr_idt
 
 	// Updates all pairs informations
 	for (i = 0; i < HELLO_MAX_NEIGHBOR; i++) {
+		if (_is_blank_idtt(raw_ngbr_idtts + i * HELLO_IDENTITY_LEN) == true) {
+			stock_node->topo_ngbr[i] = NULL;
+			continue;
+		}
 		temp_node = _get_node_by_idtt(raw_ngbr_idtts + i * HELLO_IDENTITY_LEN, nettopo_graph.topo_nodes, nettopo_graph.topo_nodes_number);
 		if (temp_node == NULL) {
-			temp_node = malloc(sizeof(nettopo_node_t));	
-			memcpy(temp_node->topo_idtt, raw_ngbr_idtts + i * HELLO_IDENTITY_LEN, HELLO_IDENTITY_LEN);
+			temp_node = _create_new_node(raw_ngbr_idtts + i * HELLO_IDENTITY_LEN);
 			_insert_node_to_graph(temp_node);
 		}
 		// Update node pairing information
