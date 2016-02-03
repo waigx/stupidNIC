@@ -139,7 +139,7 @@ int _remove_node_from_graph(nettopo_node_t * node)
 }
 
 
-void _run_dijkstra(nettopo_node_t * start_node, nettopo_graph_t * graph)
+void nettopo_run_dijkstra(nettopo_node_t * start_node, nettopo_graph_t * graph)
 {
 	int i;
 	int current_node_idx;

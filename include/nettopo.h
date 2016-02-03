@@ -46,5 +46,6 @@ typedef struct nettopo_graph {
 
 nettopo_graph_t nettopo_graph;
 int nettopo_update_graph(unsigned char *, unsigned char *, unsigned char *);
+void nettopo_run_dijkstra(nettopo_node_t *, nettopo_graph_t *);
 
 #endif
