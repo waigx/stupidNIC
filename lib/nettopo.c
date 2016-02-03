@@ -68,6 +68,16 @@ nettopo_node_t * _get_node_by_idtt(unsigned char * node_idtt, nettopo_node_t ** 
 }
 
 
+int _get_index_by_node(nettopo_node_t * node, nettopo_node_t ** node_array, uint64_t node_array_len)
+{
+	int i;
+	for (i = 0; i < node_array_len; i++)
+		if (node_array[i] == node)
+			return i;
+	return -1;
+}
+
+
 nettopo_node_t * _create_new_node(unsigned char * node_idtt)
 {
 	int i;
@@ -96,6 +106,8 @@ int _insert_node_to_graph(nettopo_node_t * node)
 	nettopo_graph.topo_nodes[nettopo_graph.topo_nodes_number] = node;
 	nettopo_graph.topo_next_hop[nettopo_graph.topo_nodes_number] = NULL;
 	nettopo_graph.topo_nodes_number += 1;
+
+	free(node);
 
 	return 0;
 }
@@ -129,7 +141,47 @@ int _remove_node_from_graph(nettopo_node_t * node)
 
 void _run_dijkstra(nettopo_node_t * start_node, nettopo_graph_t * graph)
 {
-	// TODO
+	int i;
+	int current_node_idx;
+	int temp_node_idx;
+	uint64_t dist;
+	nettopo_node_t * current_node;
+	nettopo_node_t * temp_node;
+	bool visited_nodes[NETTOPO_MAX_NODE] = {false};
+	uint64_t current_dists[NETTOPO_MAX_NODE] = {UINT64_MAX};
+	
+	current_node = start_node;
+	current_node_idx = _get_index_by_node(current_node, graph->topo_nodes, graph->topo_nodes_number);
+	current_dists[current_node_idx] = 0;
+	graph->topo_next_hop[current_node_idx] = start_node;
+
+	while (visited_nodes[current_node_idx] == false) {
+		visited_nodes[current_node_idx] = true;
+		for (i = 0; i < HELLO_MAX_NEIGHBOR; i++) {
+			temp_node = current_node->topo_ngbr[i];
+			if (temp_node == NULL)
+				continue;
+			temp_node_idx = _get_index_by_node(temp_node, graph->topo_nodes, graph->topo_nodes_number);
+			if (current_dists[current_node_idx] + 1 < current_dists[temp_node_idx]) {
+				current_dists[temp_node_idx] = current_dists[current_node_idx] + 1;
+				if (graph->topo_next_hop[current_node_idx] == start_node)
+					graph->topo_next_hop[temp_node_idx] = temp_node;
+				else
+					graph->topo_next_hop[temp_node_idx] = graph->topo_next_hop[current_node_idx];
+
+			}
+		}
+		
+		dist = UINT64_MAX;
+		for (i = 0; i < graph->topo_nodes_number; i++) {
+			if ((visited_nodes[i] == false) && (current_dists[i] < dist)) {
+				current_node = graph->topo_nodes[i];
+				dist = current_dists[i];
+			}
+		}
+		current_node_idx = _get_index_by_node(current_node, graph->topo_nodes, graph->topo_nodes_number);
+	}
+
 }
 
 

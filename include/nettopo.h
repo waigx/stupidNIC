@@ -29,6 +29,7 @@
 
 
 #define NETTOPO_MAX_NODE				    32
+#define NETTOPO_DEFAULT_WEIGTH				     1
 
 
 typedef struct nettopo_node {
