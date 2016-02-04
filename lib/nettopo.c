@@ -147,11 +147,13 @@ void nettopo_run_dijkstra(nettopo_graph_t * graph, nettopo_node_t * start_node)
 	uint64_t dist;
 	nettopo_node_t * current_node;
 	nettopo_node_t * temp_node;
-	bool visited_nodes[NETTOPO_MAX_NODE] = {false};
-	uint64_t current_dists[NETTOPO_MAX_NODE] = {UINT64_MAX};
+	bool visited_nodes[NETTOPO_MAX_NODE];
+	uint64_t current_dists[NETTOPO_MAX_NODE];
 	
-	for (i = 0; i < graph->topo_nodes_number; i++)
+	for (i = 0; i < graph->topo_nodes_number; i++) {
+		visited_nodes[i] = false;
 		current_dists[i] = UINT64_MAX;
+	}
 
 	current_node = start_node;
 	current_node_idx = _get_index_by_node(current_node, graph->topo_nodes, graph->topo_nodes_number);
