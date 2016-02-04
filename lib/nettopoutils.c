@@ -27,16 +27,30 @@
 #include <nettopo.h>
 
 
-void _dump_node(nettopo_node_t *node)
+bool _is_same_node_idtt(unsigned char * node_1, unsigned char * node_2);
+bool _is_blank_idtt(unsigned char * node_idtt);
+nettopo_node_t * _get_node_by_idtt(unsigned char * node_idtt, nettopo_node_t ** node_array, uint64_t node_array_len);
+int _get_index_by_node(nettopo_node_t * node, nettopo_node_t ** node_array, uint64_t node_array_len);
+
+
+void _dump_node(nettopo_node_t *node, nettopo_graph_t * graph, int node_index)
 {
 	int i;
-	printf("%s\t------------\t|\n", node->topo_idtt);
+	int outbound_port;
+	if (node_index != 0) {
+		if (graph->topo_next_hop[node_index] == NULL)
+			printf("(NULL)");
+		else
+			printf("(%d)", _get_index_by_node(graph->topo_next_hop[node_index], graph->topo_nodes[0]->topo_ngbr, HELLO_MAX_NEIGHBOR));
+	}
+	printf("\t%s -----\t|\n", node->topo_idtt);
 	for (i = 0; i < HELLO_MAX_NEIGHBOR; i++) {
 		if (node->topo_ngbr[i] == NULL) {
-			printf("\t\t\t|(%hhu) --\n", i);
+			printf("\t\t|(%hhu) --\n", i);
 			continue;
 		} else {
-			printf("\t\t\t|(%hhu) --- %s\n", i, node->topo_ngbr[i]->topo_idtt);
+			outbound_port = _get_index_by_node(node, node->topo_ngbr[i]->topo_ngbr, HELLO_MAX_NEIGHBOR);
+			printf("\t\t|(%hhu) --- (%hhu) %s\n", i, outbound_port, node->topo_ngbr[i]->topo_idtt);
 		}
 	}
 }
@@ -45,9 +59,9 @@ void _dump_node(nettopo_node_t *node)
 void nttutil_dump_graph(nettopo_graph_t *graph)
 {
 	int i;
-	printf("Nodes Number: %llu\n", (long long unsigned int)(graph->topo_nodes_number));
+	printf(" * Nodes Number: %llu\n", (long long unsigned int)(graph->topo_nodes_number));
 	for (i = 0 ; i < graph->topo_nodes_number; i++) {
-		_dump_node(graph->topo_nodes[i]);
+		_dump_node(graph->topo_nodes[i], graph, i);
 		printf("\n");
 	}
 }

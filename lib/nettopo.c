@@ -150,10 +150,14 @@ void nettopo_run_dijkstra(nettopo_graph_t * graph, nettopo_node_t * start_node)
 	bool visited_nodes[NETTOPO_MAX_NODE] = {false};
 	uint64_t current_dists[NETTOPO_MAX_NODE] = {UINT64_MAX};
 	
+	for (i = 0; i < graph->topo_nodes_number; i++)
+		current_dists[i] = UINT64_MAX;
+
 	current_node = start_node;
 	current_node_idx = _get_index_by_node(current_node, graph->topo_nodes, graph->topo_nodes_number);
 	current_dists[current_node_idx] = 0;
 	graph->topo_next_hop[current_node_idx] = start_node;
+
 
 	while (visited_nodes[current_node_idx] == false) {
 		visited_nodes[current_node_idx] = true;
@@ -171,7 +175,6 @@ void nettopo_run_dijkstra(nettopo_graph_t * graph, nettopo_node_t * start_node)
 
 			}
 		}
-		
 		dist = UINT64_MAX;
 		for (i = 0; i < graph->topo_nodes_number; i++) {
 			if ((visited_nodes[i] == false) && (current_dists[i] < dist)) {
