@@ -28,7 +28,9 @@
 #include <string.h>
 #include <stdlib.h>
 
+
 extern nettopo_graph_t nettopo_graph;
+extern nettopo_node_t node_table[NETTOPO_MAX_NODE];
 
 
 bool _is_same_node_idtt(unsigned char * node_1, unsigned char * node_2)
@@ -78,12 +80,29 @@ int _get_index_by_node(nettopo_node_t * node, nettopo_node_t ** node_array, uint
 }
 
 
+void * _malloc_node()
+{
+	int i;
+	for (i = 0; i < NETTOPO_MAX_NODE; i++) {
+		if (_is_blank_idtt(node_table[i].topo_idtt)){
+			return node_table + i;
+		}
+	}
+	return NULL;
+}
+
+
+void _free_node(nettopo_node_t *node){
+	memset(node->topo_idtt, 0, HELLO_IDENTITY_LEN);
+}
+
+
 nettopo_node_t * _create_new_node(unsigned char * node_idtt)
 {
 	int i;
 	nettopo_node_t * node;
 
-	node = malloc(sizeof(nettopo_node_t));	
+	node = _malloc_node();	
 	memcpy(node->topo_idtt, node_idtt, HELLO_IDENTITY_LEN);
 	for (i = 0; i < HELLO_MAX_NEIGHBOR; i++)
 		node->topo_ngbr[i] = NULL;
@@ -133,7 +152,7 @@ int _remove_node_from_graph(nettopo_node_t * node)
 	nettopo_graph.topo_nodes[i] = NULL;
 	nettopo_graph.topo_nodes_number -= 1;
 
-	free(node);
+	_free_node(node);
 
 	return 0;
 }

@@ -64,7 +64,7 @@ int main(int argc, char * argv[], char * envp[])
 	in = 0;
 	while (in != 'q') {
 		printf("Dump(d), Update(u), Calculate(c), Quite(q): ");
-		scanf("%c", &in);
+		in = getchar();
 		switch (in) {
 		case 'd':
 			nttutil_dump_graph(&nettopo_graph);
