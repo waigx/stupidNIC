@@ -27,7 +27,7 @@
 #include <stdint.h>
 
 
-#define CKHTABLE_IDX_BITS			6
+#define CKHTABLE_IDX_BITS			5
 #define CKHTABLE_KEY_BITS		       48
 #define CKHTABLE_MAX_TRY		      256
 

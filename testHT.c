@@ -62,7 +62,7 @@ void dump_bin(uint64_t idx)
 void dump_ety(uint64_t entry)
 {
 	printf("%llu ", (long long unsigned int)(entry >> (CKHTABLE_KEY_BITS)));
-	printf("%llu ", (long long unsigned int)((entry & ((1UL << CKHTABLE_KEY_BITS) - 1))));
+	printf("%llx ", (long long unsigned int)((entry & ((1UL << CKHTABLE_KEY_BITS) - 1))));
 }
 
 float tableBenchmark(uint64_t * collision_times)
@@ -126,7 +126,7 @@ int main(int argc, char *argv[], char *envp[])
 	char op;
 	uint64_t key;
 	uint64_t val;
-	int i;
+	unsigned int i;
 	uint64_t table_a[TABLE_SIZE] = {0};
 	uint64_t table_b[TABLE_SIZE] = {0};
 	uint64_t table_c[TABLE_SIZE] = {0};
@@ -144,12 +144,12 @@ int main(int argc, char *argv[], char *envp[])
 	ckhti.getentry = get_entry;
 	ckhti.setentry = set_entry;
 
-	uint64_t collision_times[101] = {0};
-	tableBenchmark(collision_times);
-	for (i=1; i<100; i++) {
-		printf("%d %f\n", i, 1.0*collision_times[i]/TEST_TIMES);
-	}
-	return 0;
+//	uint64_t collision_times[101] = {0};
+//	tableBenchmark(collision_times);
+//	for (i=1; i<100; i++) {
+//		printf("%d %f\n", i, 1.0*collision_times[i]/TEST_TIMES);
+//	}
+//	return 0;
 
 	printf("Input mode (w, r, d, q): ");
 	while (1) {
@@ -166,14 +166,15 @@ int main(int argc, char *argv[], char *envp[])
 			printf("%d\n", (int)ckhtable_get(&ckhti, key));
 			break;
 		case 'd':
-			printf("--Table A--\t\t--Table B--\t\t--Table C--\t\t--Table D--\n");
+			printf("\t--Table A--\t\t\t--Table B--\t\t\t--Table C--\t\t\t--Table D--\n");
 			for (i = 0; i < TABLE_SIZE; i ++) {
+				printf("0x%x:\t", i);
 				dump_ety(table_a[i]);
-				printf("\t\t\t");
+				printf("\t\t\t\t");
 				dump_ety(table_b[i]);
-				printf("\t\t\t");
+				printf("\t\t\t\t");
 				dump_ety(table_c[i]);
-				printf("\t\t\t");
+				printf("\t\t\t\t");
 				dump_ety(table_d[i]);
 				printf("\n");
 			}

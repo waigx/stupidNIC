@@ -50,5 +50,7 @@ nettopo_node_t node_table[NETTOPO_MAX_NODE];
 
 int nettopo_update_graph(unsigned char *, unsigned char *, unsigned char *);
 void nettopo_run_dijkstra(nettopo_graph_t *, nettopo_node_t *);
+uint64_t nettopo_run_bfs(nettopo_graph_t * graph, nettopo_node_t * start_node, nettopo_node_t * relay_node);
+void nettopo_sort(nettopo_graph_t * graph);
 
 #endif

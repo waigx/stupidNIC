@@ -63,7 +63,7 @@ int main(int argc, char * argv[], char * envp[])
 
 	in = 0;
 	while (in != 'q') {
-		printf("Dump(d), Update(u), Calculate(c), Quite(q): ");
+		printf("Dump(d), Update(u), Calculate(c), Sort(s), Quite(q): ");
 		in = getchar();
 		switch (in) {
 		case 'd':
@@ -71,7 +71,10 @@ int main(int argc, char * argv[], char * envp[])
 			printf("\n");
 			break;
 		case 'c':
-			nettopo_run_dijkstra(&nettopo_graph, nettopo_graph.topo_nodes[1]);
+			nettopo_run_dijkstra(&nettopo_graph, nettopo_graph.topo_nodes[0]);
+			break;
+		case 's':
+			nettopo_sort(&nettopo_graph);
 			break;
 		case 'q':
 			return 0;

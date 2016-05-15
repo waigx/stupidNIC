@@ -158,6 +158,86 @@ int _remove_node_from_graph(nettopo_node_t * node)
 }
 
 
+int _nodecmp(const void * a, const void * b)
+{
+	int i;
+	nettopo_node_t ** node_a = (nettopo_node_t **)a;
+	nettopo_node_t ** node_b = (nettopo_node_t **)b;
+
+	for (i = 0; i < HELLO_IDENTITY_LEN; i++) {
+		if ((*node_a)->topo_idtt[i] > (*node_b)->topo_idtt[i])
+			return 1;
+		if ((*node_a)->topo_idtt[i] < (*node_b)->topo_idtt[i])
+			return -1;
+	}	
+	return 0;
+}
+
+
+void nettopo_sort(nettopo_graph_t * graph)
+{
+	qsort(graph->topo_nodes, graph->topo_nodes_number, sizeof(nettopo_node_t *), _nodecmp);
+	return;
+}
+
+
+uint64_t nettopo_run_bfs(nettopo_graph_t * graph, nettopo_node_t * start_node, nettopo_node_t * relay_node)
+{
+	int i, j;
+	bool visited_nodes[NETTOPO_MAX_NODE];
+	bool next_nodes[NETTOPO_MAX_NODE];
+	bool next_nodes_temp[NETTOPO_MAX_NODE];
+	int current_node_idx;
+	int next_nodes_num;
+	uint64_t ports;
+	nettopo_node_t * current_node;
+
+	for (i = 0; i < graph->topo_nodes_number; i++) {
+		visited_nodes[i] = false;
+		next_nodes[i] = false;
+		next_nodes_temp[i] = false;
+	}
+
+	current_node = start_node;
+	current_node_idx = _get_index_by_node(current_node, graph->topo_nodes, graph->topo_nodes_number);
+	next_nodes[current_node_idx] = true;
+	next_nodes_num = 1;
+	
+	while (next_nodes_num != 0) {
+		next_nodes_num = 0;
+		for (i = 0; i < graph->topo_nodes_number; i++) {
+			if (next_nodes[i]) {
+				ports = 0;
+				for (j = 0; j < HELLO_MAX_NEIGHBOR; j ++) {
+					current_node = graph->topo_nodes[i]->topo_ngbr[j];
+					if (current_node != NULL) {
+						current_node_idx = _get_index_by_node(current_node, graph->topo_nodes, graph->topo_nodes_number);
+					} else {
+						continue;
+					}
+					if (visited_nodes[current_node_idx] || next_nodes[current_node_idx]) {
+						continue;
+					} else {
+						next_nodes_num += 1;
+						next_nodes_temp[current_node_idx] = true;
+						ports <<= 4;
+						ports |= j;
+					}
+				}
+				if (graph->topo_nodes[i] == relay_node)
+					return ports;
+			}
+		}
+
+		for (i = 0; i < graph->topo_nodes_number; i++) {
+			next_nodes[i] = next_nodes_temp[i];
+		}
+	}
+
+	return -1;	
+}
+
+
 void nettopo_run_dijkstra(nettopo_graph_t * graph, nettopo_node_t * start_node)
 {
 	int i;
@@ -206,7 +286,6 @@ void nettopo_run_dijkstra(nettopo_graph_t * graph, nettopo_node_t * start_node)
 		}
 		current_node_idx = _get_index_by_node(current_node, graph->topo_nodes, graph->topo_nodes_number);
 	}
-
 }
 
 
@@ -258,4 +337,7 @@ int nettopo_update_graph(unsigned char * node_idtt, unsigned char * raw_ngbr_idt
 
 	return 0;
 }
+
+
+
 
