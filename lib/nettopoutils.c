@@ -37,12 +37,12 @@ void _dump_node(nettopo_node_t *node, nettopo_graph_t * graph, int node_index)
 {
 	int i;
 	int outbound_port;
-	if (node_index != 0) {
-		if (graph->topo_next_hop[node_index] == NULL)
-			printf("(NULL)");
-		else
-			printf("(%d)", _get_index_by_node(graph->topo_next_hop[node_index], graph->topo_nodes[0]->topo_ngbr, HELLO_MAX_NEIGHBOR));
-	}
+
+	if (graph->topo_next_hop[node_index] == NULL)
+		printf("(NULL)");
+	else
+		printf("(%d)", _get_index_by_node(graph->topo_next_hop[node_index], graph->topo_start_node->topo_ngbr, HELLO_MAX_NEIGHBOR));
+
 	printf("\t%s -----\t|\n", node->topo_idtt);
 	for (i = 0; i < HELLO_MAX_NEIGHBOR; i++) {
 		if (node->topo_ngbr[i] == NULL) {
@@ -60,6 +60,7 @@ void nttutil_dump_graph(nettopo_graph_t *graph)
 {
 	int i;
 	printf(" * Nodes Number: %llu\n", (long long unsigned int)(graph->topo_nodes_number));
+	printf(" * Start Node: %s\n", graph->topo_start_node->topo_idtt);
 	for (i = 0 ; i < graph->topo_nodes_number; i++) {
 		_dump_node(graph->topo_nodes[i], graph, i);
 		printf("\n");

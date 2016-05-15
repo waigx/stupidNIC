@@ -1,5 +1,5 @@
 CC = gcc
-CFLAGS = -Iinclude -Wall -Werror -g -lpthread
+CFLAGS = -Iinclude -Wall -Werror -g -pthread
 
 TARGETS = $(patsubst ./%.c, %, $(wildcard ./*.c))
 
@@ -18,6 +18,8 @@ obj/%.o: lib/%.c $(wildcard include/*.h)
 	@mkdir -p obj
 	$(CC) -c $(CFLAGS) -o $@ $<
 
+run:
+	make clean; make; sudo ./usher
 
 .PHONY: clean
 

@@ -48,13 +48,14 @@ extern char hello_if[HELLO_IF_NAME_LEN];
 void _dump_nghr_info(hello_thread_args_t * hello_args_ptr)
 {
 	int i;
+	printf("[Hello] -----\n");
 	for (i = 0; i < HELLO_MAX_NEIGHBOR; i++) {
-		printf("Port #%d <---> ", i);
+		printf("[Hello] Port #%d <---> ", i);
 		printf("Port #%hhu of ", *(hello_args_ptr->hello_payload + HELLO_MAX_NEIGHBOR * HELLO_IDENTITY_LEN + i));
 		dumpmacaddr(hello_args_ptr->hello_payload + i * HELLO_IDENTITY_LEN);
 		printf("\n");
 	}
-	printf("---\n");
+	printf("[Hello] -----\n");
 }
 
 
@@ -97,10 +98,12 @@ void *hello_init_handler(void *init_hello_args_ptr)
 	socket_address.sll_halen = ETH_ALEN;
 
 	if (sendto(hello_send_raw_socket, eth_frame, eth_frame_len, 0, (struct sockaddr *)&socket_address, sizeof(struct sockaddr_ll)) < 0) {
-		printf("Sendto error, failed to send packets\n");
+		printf("[Hello] Sendto error, failed to send packets\n");
 	}
 
 	free(init_hello_args_ptr);
+
+	printf("[Hello] Stage 1: hello init send.\n");
 
 	return NULL;
 }
@@ -147,10 +150,11 @@ void *hello_back_handler(void *hello_back_args_ptr)
 	socket_address.sll_halen = ETH_ALEN;
 
 	if (sendto(hello_send_raw_socket, eth_frame, eth_frame_len, 0, (struct sockaddr *)&socket_address, sizeof(struct sockaddr_ll)) < 0) {
-		printf("Sendto error, failed to send packets\n");
+		printf("[Hello] Sendto error, failed to send packets\n");
 	}
 
 	free(hello_back_args_ptr);
+	printf("[Hello] Stage 2: hello back send.\n");
 
 	return NULL;
 }
@@ -204,11 +208,13 @@ void *hello_flood_handler(void *flood_hello_args_ptr)
 	socket_address.sll_halen = ETH_ALEN;
 
 	if (sendto(hello_send_raw_socket, eth_frame, eth_frame_len, 0, (struct sockaddr *)&socket_address, sizeof(struct sockaddr_ll)) < 0) {
-		printf("Sendto error, failed to send packets\n");
+		printf("[Hello] Sendto error, failed to send packets\n");
 	}
 
 	hello_sequence += 1;
 	free(flood_hello_args_ptr);
+
+	printf("[Hello] Stage 3: Hello ngbr information flooded\n");
 
 	return NULL;
 }
@@ -220,6 +226,7 @@ void hello_back(pthread_t *handler_pid, hello_thread_args_t *hello_thread_univer
 	hello_back_args_ptr = malloc(sizeof(hello_thread_args_t));
 	memcpy(hello_back_args_ptr, hello_thread_universal_args_ptr, sizeof(hello_thread_args_t));
 	pthread_create(handler_pid, NULL, &hello_back_handler,  hello_back_args_ptr);
+	printf("[Hello] Stage 2: require hello_back_handler to hello back \n");
 }
 
 

@@ -178,6 +178,7 @@ void nettopo_run_dijkstra(nettopo_graph_t * graph, nettopo_node_t * start_node)
 	current_node_idx = _get_index_by_node(current_node, graph->topo_nodes, graph->topo_nodes_number);
 	current_dists[current_node_idx] = 0;
 	graph->topo_next_hop[current_node_idx] = start_node;
+	graph->topo_start_node = start_node;
 
 
 	while (visited_nodes[current_node_idx] == false) {

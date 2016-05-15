@@ -71,7 +71,7 @@ int main(int argc, char * argv[], char * envp[])
 			printf("\n");
 			break;
 		case 'c':
-			nettopo_run_dijkstra(&nettopo_graph, nettopo_graph.topo_nodes[0]);
+			nettopo_run_dijkstra(&nettopo_graph, nettopo_graph.topo_nodes[1]);
 			break;
 		case 'q':
 			return 0;

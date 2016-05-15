@@ -40,6 +40,7 @@ typedef struct nettopo_node {
 
 typedef struct nettopo_graph {
 	uint64_t			topo_nodes_number;
+	nettopo_node_t *		topo_start_node;
 	nettopo_node_t *		topo_nodes[NETTOPO_MAX_NODE];
 	nettopo_node_t *		topo_next_hop[NETTOPO_MAX_NODE];
 } nettopo_graph_t;

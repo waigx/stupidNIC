@@ -39,20 +39,17 @@
 #define HELLO_INIT_INTERVAL				     5
 #define HELLO_FLOOD_WAIT				     1
 
-#define HELLO_DFT_IF					"eth0"
-#define HELLO_DFT_MAC	  {0xff, 0xff, 0xff, 0xff, 0xff, 0xef}
+#define HELLO_DFT_IF					"p6p1"
+#define HELLO_DFT_MAC	  {0x00, 0xff, 0xff, 0xff, 0xe1, 0x10}
 
-
-typedef enum hello_stage {
-	HELLO_STAGE_I,  
-        HELLO_STAGE_II, 
-        HELLO_STAGE_III,
-} hello_stage_t;
+#define	HELLO_STAGE_I					     1
+#define HELLO_STAGE_II					     2
+#define HELLO_STAGE_III					     3
 
 
 typedef struct hello_hdr {
 	unsigned char			hello_src[HELLO_IDENTITY_LEN];
-	hello_stage_t			hello_stage;
+	uint8_t				hello_stage;
 	uint32_t			hello_sequence;
 	unsigned char			hello_ngbr_bits;
 	unsigned char			hello_outbound_port;
